@@ -33,8 +33,7 @@ public class SecurityConfig {
     public WebSecurityCustomizer configure() {
         return (web -> {
             web.ignoring().requestMatchers(HttpMethod.GET,
-                "/swagger-ui/**", "/v2/api-docs"
-                ,"/h2-console/**", "/favicon.ico");
+                    "/v3/api-docs/**", "/swagger-resources/**", "/swagger-ui/**", "/webjars/**", "/swagger/**");
         });
     }
 

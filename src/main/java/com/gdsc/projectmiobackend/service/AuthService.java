@@ -36,6 +36,7 @@ public class AuthService {
                 .build();
 
         GoogleIdToken googleIdToken = verifier.verify(idToken);
+
         GoogleOAuth2UserInfo userInfo = new GoogleOAuth2UserInfo(googleIdToken.getPayload());
         return sendGenerateJwtToken(userInfo.getEmail(), userInfo.getName());
     }
