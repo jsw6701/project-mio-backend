@@ -1,59 +1,51 @@
 package com.gdsc.projectmiobackend.config;
 
-import com.fasterxml.classmate.TypeResolver;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-import lombok.Getter;
-import lombok.Setter;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.domain.Pageable;
-import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.schema.AlternateTypeRules;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
+import org.springframework.http.HttpHeaders;
 
-import java.util.List;
 
+
+@RequiredArgsConstructor
 @Configuration
 public class SwaggerConfig {
 
-    TypeResolver typeResolver = new TypeResolver();
-
     @Bean
-    public Docket api() {
-        return new Docket(DocumentationType.OAS_30)
-                .alternateTypeRules(AlternateTypeRules.newRule(typeResolver.resolve(Pageable.class), typeResolver.resolve(Page.class)))
-                .useDefaultResponseMessages(true) // Swagger 에서 제공해주는 기본 응답 코드 (200, 401, 403, 404) 등의 노출 여부
-                .apiInfo(apiInfo()) // Swagger UI 로 노출할 정보
-                .select()
-                .apis(RequestHandlerSelectors.basePackage("com.gdsc.projectmiobackend")) // api 스펙이 작성되어 있는 패키지 (controller)
-                .paths(PathSelectors.any()) // apis 에 위치하는 API 중 특정 path 를 선택
-                .build();
-    }
+    public OpenAPI JmtApi() {
+        Info info = new Info()
+                .title("JMT 프로젝트 API") // 타이틀
+                .version("v1") // 문서 버전
+                .description("잘못된 부분이나 오류 발생 시 바로 말씀해주세요.") // 문서 설명
+                .contact(new Contact() // 연락처
+                        .name("GDSC DJU")
+                        .email("anes53027@gmail.com"));
 
-    public ApiInfo apiInfo() {
-        return new ApiInfoBuilder()
-                .title("MIO")
-                .description("MIO swagger.")
-                .version("0.1")
-                .build();
-    }
+        // Security 스키마 설정
+        SecurityScheme bearerAuth = new SecurityScheme()
+                .type(SecurityScheme.Type.HTTP)
+                .scheme("bearer")
+                .bearerFormat("JWT")
+                .in(SecurityScheme.In.HEADER)
+                .name(HttpHeaders.AUTHORIZATION);
 
-    @Getter
-    @Setter
-    @ApiModel
-    static class Page {
-        @ApiModelProperty(value = "페이지 번호(0..N)")
-        private Integer page;
+        // Security 요청 설정
+        SecurityRequirement addSecurityItem = new SecurityRequirement();
+        addSecurityItem.addList("JWT");
 
-        @ApiModelProperty(value = "페이지 크기", allowableValues="range[0, 100]")
-        private Integer size;
-
-        @ApiModelProperty(value = "정렬(사용법: 컬럼명,ASC|DESC)")
-        private List<String> sort;
+        return new OpenAPI()
+                // Security 인증 컴포넌트 설정
+                .components(new Components().addSecuritySchemes("JWT", bearerAuth))
+                // API 마다 Security 인증 컴포넌트 설정
+                .addSecurityItem(addSecurityItem)
+                .info(info);
     }
 }
