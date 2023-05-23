@@ -4,6 +4,7 @@ package com.gdsc.projectmiobackend.entity;
 import com.gdsc.projectmiobackend.common.RoleType;
 import com.gdsc.projectmiobackend.common.SocialType;
 import com.gdsc.projectmiobackend.common.Status;
+import com.gdsc.projectmiobackend.oauth.GoogleOAuth2UserInfo;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -24,15 +25,19 @@ public class UserEntity{
 
     private String profileImageUrl;  // 파일 저장 경로
 
-    @Nullable
-    @Column(unique = true)
-    private String nickname;
-
-    @Enumerated(EnumType.STRING)
-    private SocialType socialType;
+    private String name;
 
     @Enumerated(EnumType.STRING)
     private RoleType roleType;
+
     @Enumerated(EnumType.STRING)
     private Status status;
+
+    public UserEntity(GoogleOAuth2UserInfo userInfo) {
+        this.email = userInfo.getEmail();
+        this.profileImageUrl = userInfo.getImageUrl();
+        this.name = userInfo.getName();
+        this.roleType = RoleType.MEMBER;
+        this.status = Status.ACTIVE;
+    }
 }

@@ -1,6 +1,7 @@
 package com.gdsc.projectmiobackend.service;
 
 
+import com.gdsc.projectmiobackend.entity.UserEntity;
 import com.gdsc.projectmiobackend.repository.UserRepository;
 import com.gdsc.projectmiobackend.common.RoleType;
 import com.gdsc.projectmiobackend.jwt.TokenProvider;
@@ -42,6 +43,11 @@ public class AuthService {
             }
             else {
                 GoogleOAuth2UserInfo userInfo = new GoogleOAuth2UserInfo(googleIdToken.getPayload());
+
+                if(!userRepository.existsByEmail(userInfo.getEmail())){
+                    UserEntity userEntity = new UserEntity(userInfo);
+                    userRepository.save(userEntity);
+                }
                 return sendGenerateJwtToken(userInfo.getEmail(), userInfo.getName());
             }
         } catch (Exception e) {
