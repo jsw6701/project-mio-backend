@@ -18,7 +18,7 @@ public class RefreshTokenEntity {
 
     @OneToOne(targetEntity = UserEntity.class, fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name="user_id", insertable = false, updatable = false)
+    @JoinColumn(insertable = false, updatable = false)
     private UserEntity user;
 
     @Column(name = "user_id")
