@@ -10,7 +10,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-
+import java.util.List;
 
 
 @Entity
@@ -45,8 +45,8 @@ public class Post {
     // 카테고리 아이디
     private Category category;
 
-/*    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
-    private List<Comment> commentList = new ArrayList<>();*/
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    private List<Comment> commentList = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn

@@ -35,6 +35,5 @@ public class AuthController {
     public ResponseEntity<?> logout(@AuthenticationPrincipal UserInfo user, @RequestBody LogoutRequest logoutRequest) throws Exception {
         authService.logout(user.getEmail() , logoutRequest.refreshToken());
         return ResponseEntity.ok("LOGOUT_SUCCESS");
-
     }
 }
