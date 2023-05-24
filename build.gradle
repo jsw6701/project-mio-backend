@@ -39,6 +39,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation group: 'com.google.api-client', name: 'google-api-client-jackson2', version: '2.2.0'
 
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.springframework.kafka:spring-kafka'
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
+
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 }
 

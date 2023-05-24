@@ -34,11 +34,22 @@ public class Post {
     // 작성일
     private LocalDateTime createDate;
 
+    // 카풀 날짜
+    private LocalDateTime targetDate;
+
+    //등하교 선택
+    private Boolean verifyGoReturn;
+
+    //탑승자 수
+    private Integer numberOfPassengers;
+
     private Long viewCount;
 
     private String fileName;
 
     private String filePath;
+
+    private Boolean verifyFinish;
 
     @ManyToOne
     @JoinColumn
@@ -55,16 +66,20 @@ public class Post {
 
 
     @Builder
-    public Post(Long postId, String title, String content, LocalDateTime createDate, Category category, UserEntity user, Long viewCount, String fileName, String filePath){
+    public Post(Long postId, String title, String content, LocalDateTime createDate, LocalDateTime targetDate, Category category, Boolean verifyGoReturn, Integer numberOfPassengers, UserEntity user, Long viewCount, String fileName, String filePath, Boolean verifyFinish){
         this.id = postId;
         this.title = title;
         this.content = content;
         this.createDate = createDate;
+        this.targetDate = targetDate;
         this.category = category;
+        this.verifyGoReturn = verifyGoReturn;
+        this.numberOfPassengers = numberOfPassengers;
         this.user = user;
         this.viewCount = viewCount;
         this.fileName = fileName;
         this.filePath = filePath;
+        this.verifyFinish = verifyFinish;
     }
 
     public PostDto toDto() {
@@ -74,10 +89,13 @@ public class Post {
                 .content(content)
                 .createDate(LocalDateTime.now())
                 .category(category)
+                .verifyGoReturn(verifyGoReturn)
+                .numberOfPassengers(numberOfPassengers)
                 .user(user)
                 .fileName(fileName)
                 .filePath(filePath)
                 .viewCount(viewCount)
+                .verifyFinish(verifyFinish)
                 .build();
     }
 }

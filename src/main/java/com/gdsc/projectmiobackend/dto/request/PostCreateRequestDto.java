@@ -28,6 +28,14 @@ public class PostCreateRequestDto {
     @NotEmpty(message="내용은 필수 항목입니다.")
     private String content;
 
+    private LocalDateTime targetDate;
+
+    //등하교 선택
+    private Boolean verifyGoReturn;
+
+    //탑승자 수
+    private Integer numberOfPassengers;
+
     @Nullable
     private MultipartFile file;
 
@@ -40,6 +48,9 @@ public class PostCreateRequestDto {
     @Nullable
     private Long viewCount;
 
+    //마감 여부
+    private Boolean verifyFinish;
+
 
     public Post toEntity(Category category, UserEntity user) {
 
@@ -47,11 +58,15 @@ public class PostCreateRequestDto {
                 .title(title)
                 .content(content)
                 .createDate(LocalDateTime.now())
+                .targetDate(targetDate)
+                .verifyGoReturn(verifyGoReturn)
+                .numberOfPassengers(numberOfPassengers)
                 .category(category)
                 .fileName(fileName)
                 .filePath(filePath)
                 .viewCount(viewCount)
                 .user(user)
+                .verifyFinish(verifyFinish)
                 .build();
     }
 }

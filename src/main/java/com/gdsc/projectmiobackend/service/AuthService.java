@@ -1,6 +1,7 @@
 package com.gdsc.projectmiobackend.service;
 
 
+import com.gdsc.projectmiobackend.dto.request.AdditionalUserPatchDto;
 import com.gdsc.projectmiobackend.entity.UserEntity;
 import com.gdsc.projectmiobackend.repository.UserRepository;
 import com.gdsc.projectmiobackend.common.RoleType;
@@ -53,6 +54,14 @@ public class AuthService {
         } catch (Exception e) {
             throw new Exception("INVALID_TOKEN");
         }
+    }
+
+    @Transactional
+    public UserEntity update(Long userId, AdditionalUserPatchDto additionalUserPatchDto) throws Exception {
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new Exception("INVALID_TOKEN"));
+        userEntity.setGender(additionalUserPatchDto.getGender());
+        userEntity.setVerifySmoker(additionalUserPatchDto.getVerifySmoker());
+        return userEntity;
     }
 
     @Transactional

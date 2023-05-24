@@ -18,21 +18,29 @@ public class PostDto {
     private String title;
     private String content;
     private LocalDateTime createDate;
+    private LocalDateTime targetDate;
     private Category category;
+    private Boolean verifyGoReturn;
+    private Integer numberOfPassengers;
     private UserEntity user;
     private Long viewCount;
     private String fileName;
     private String filePath;
+    private Boolean verifyFinish;
 
     public PostDto(Post post){
         this.postId = post.getId();
         this.title = post.getTitle();
         this.content = post.getContent();
         this.createDate = post.getCreateDate();
+        this.targetDate = post.getTargetDate();
         this.category = post.getCategory();
+        this.verifyGoReturn = post.getVerifyGoReturn();
+        this.numberOfPassengers = post.getNumberOfPassengers();
         this.viewCount = post.getViewCount();
         this.user = post.getUser();
         this.fileName = post.getFileName();
         this.filePath = post.getFilePath();
+        this.verifyFinish = post.getVerifyFinish();
     }
 }

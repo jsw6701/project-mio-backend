@@ -27,6 +27,14 @@ public class UserEntity{
 
     private String name;
 
+    //성별
+    @Nullable
+    private Boolean gender;
+
+    //흡연여부
+    @Nullable
+    private Boolean verifySmoker;
+
     @Enumerated(EnumType.STRING)
     private RoleType roleType;
 
