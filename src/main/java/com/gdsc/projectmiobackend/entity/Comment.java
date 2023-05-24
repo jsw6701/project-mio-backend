@@ -2,13 +2,12 @@ package com.gdsc.projectmiobackend.entity;
 
 import com.gdsc.projectmiobackend.dto.CommentDto;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Entity
+@Setter
 @Getter
 @Builder
 @AllArgsConstructor

@@ -2,6 +2,8 @@ package com.gdsc.projectmiobackend.controller;
 
 
 import com.gdsc.projectmiobackend.dto.CommentDto;
+import com.gdsc.projectmiobackend.dto.request.CategoryPatchRequestDto;
+import com.gdsc.projectmiobackend.dto.request.CommentPatchRequestDto;
 import com.gdsc.projectmiobackend.dto.request.CommentRequestDto;
 import com.gdsc.projectmiobackend.entity.Comment;
 import com.gdsc.projectmiobackend.jwt.dto.UserInfo;
@@ -29,5 +31,11 @@ public class CommentController {
     public ResponseEntity<List<CommentDto>> readAllByPostId(@PathVariable Long postId){
         List<CommentDto> commentDtoList = this.commentService.getCommentList(postId);
         return ResponseEntity.ok(commentDtoList);
+    }
+
+    @PatchMapping("{commentId}")
+    public ResponseEntity<CommentDto> update(@RequestBody CommentPatchRequestDto commentPatchRequestDto, @PathVariable Long commentId, @AuthenticationPrincipal UserInfo user){
+        Comment comment = this.commentService.updateComment(commentPatchRequestDto, commentId, user.getEmail());
+        return ResponseEntity.ok(comment.toDto());
     }
 }
