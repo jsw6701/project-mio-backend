@@ -18,7 +18,7 @@ import org.springframework.http.HttpHeaders;
 public class SwaggerConfig {
 
     @Bean
-    public OpenAPI JmtApi() {
+    public OpenAPI MIOApi() {
         Info info = new Info()
                 .title("MIO 프로젝트 API") // 타이틀
                 .version("v1") // 문서 버전
