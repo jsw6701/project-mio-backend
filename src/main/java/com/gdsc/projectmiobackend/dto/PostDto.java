@@ -7,11 +7,14 @@ import com.gdsc.projectmiobackend.entity.UserEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Builder
+@NoArgsConstructor
 @AllArgsConstructor
 public class PostDto {
     private Long postId;
@@ -27,7 +30,7 @@ public class PostDto {
     private String fileName;
     private String filePath;
     private Boolean verifyFinish;
-
+    private List<UserEntity> participants;
     public PostDto(Post post){
         this.postId = post.getId();
         this.title = post.getTitle();
@@ -42,5 +45,6 @@ public class PostDto {
         this.fileName = post.getFileName();
         this.filePath = post.getFilePath();
         this.verifyFinish = post.getVerifyFinish();
+        this.participants = post.getParticipants();
     }
 }

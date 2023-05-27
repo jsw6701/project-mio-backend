@@ -5,6 +5,7 @@ import com.gdsc.projectmiobackend.dto.PostDto;
 import com.gdsc.projectmiobackend.dto.request.PostCreateRequestDto;
 import com.gdsc.projectmiobackend.dto.request.PostPatchRequestDto;
 import com.gdsc.projectmiobackend.entity.Post;
+import com.gdsc.projectmiobackend.entity.UserEntity;
 import com.gdsc.projectmiobackend.jwt.dto.UserInfo;
 import com.gdsc.projectmiobackend.service.PostService;
 import lombok.AllArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -122,5 +125,17 @@ public class PostController {
     public ResponseEntity<PostDto> getPostById(@PathVariable Long id){
         Post post = postService.showDetailPost(id);
         return ResponseEntity.ok(new PostDto(post));
+    }
+
+    @PostMapping("/{postId}/participate")
+    public ResponseEntity<Void> participateInPost(@PathVariable Long postId, @AuthenticationPrincipal UserInfo user) {
+        postService.participateInPost(postId, user.getEmail());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/{postId}/participants")
+    public ResponseEntity<List<UserEntity>> getParticipantsByPostId(@PathVariable Long postId) {
+        List<UserEntity> participants = postService.getParticipantsByPostId(postId);
+        return new ResponseEntity<>(participants, HttpStatus.OK);
     }
 }
