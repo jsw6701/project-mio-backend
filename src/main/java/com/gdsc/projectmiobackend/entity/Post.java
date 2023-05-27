@@ -63,7 +63,11 @@ public class Post {
     @JoinColumn
     private UserEntity user;
 
-
+    @ManyToMany
+    @JoinTable(name = "post_participants",
+            joinColumns = @JoinColumn(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id"))
+    private List<UserEntity> participants = new ArrayList<>();
 
     @Builder
     public Post(Long postId, String title, String content, LocalDateTime createDate, LocalDateTime targetDate, Category category, Boolean verifyGoReturn, Integer numberOfPassengers, UserEntity user, Long viewCount, String fileName, String filePath, Boolean verifyFinish){
@@ -96,6 +100,7 @@ public class Post {
                 .filePath(filePath)
                 .viewCount(viewCount)
                 .verifyFinish(verifyFinish)
+                .participants(participants)
                 .build();
     }
 }

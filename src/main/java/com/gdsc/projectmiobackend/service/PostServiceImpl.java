@@ -14,6 +14,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -47,7 +49,7 @@ public class PostServiceImpl implements PostService{
         Post post = this.findById(id);
         Category category = categoryRepository.findById(postPatchRequestDto.getCategoryId()).orElseThrow(() -> new IllegalArgumentException("TODO 생성실패"));
 
-        if (!Objects.equals(post.getUser().getEmail(), email)) {
+        if (!Objects.equals(post.getUser().getEmail(), user.getEmail())) {
             throw new IllegalStateException("해당 글을 삭제할 권한이 없습니다.");
         }
 
@@ -85,6 +87,24 @@ public class PostServiceImpl implements PostService{
         UserEntity user = this.userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("카테고리가 없습니다."));
         Page<Post> page = postRepository.findByUser(user, pageable);
         return page.map(Post::toDto);
+    }
+
+    @Override
+    public void participateInPost(Long postId, String email) {
+        UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Post ID: " + postId));
+
+        post.getParticipants().add(user);
+        postRepository.save(post);
+    }
+
+    @Override
+    public List<UserEntity> getParticipantsByPostId(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Post ID: " + postId));
+
+        return post.getParticipants();
     }
 
     @Override
