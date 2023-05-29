@@ -1,0 +1,50 @@
+package com.gdsc.projectmiobackend.dto;
+
+
+import com.gdsc.projectmiobackend.entity.Category;
+import com.gdsc.projectmiobackend.entity.Post;
+import com.gdsc.projectmiobackend.entity.UserEntity;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class PostDto {
+    private Long postId;
+    private String title;
+    private String content;
+    private LocalDateTime createDate;
+    private LocalDateTime targetDate;
+    private Category category;
+    private Boolean verifyGoReturn;
+    private Integer numberOfPassengers;
+    private UserEntity user;
+    private Long viewCount;
+    private String fileName;
+    private String filePath;
+    private Boolean verifyFinish;
+    private List<UserEntity> participants;
+    public PostDto(Post post){
+        this.postId = post.getId();
+        this.title = post.getTitle();
+        this.content = post.getContent();
+        this.createDate = post.getCreateDate();
+        this.targetDate = post.getTargetDate();
+        this.category = post.getCategory();
+        this.verifyGoReturn = post.getVerifyGoReturn();
+        this.numberOfPassengers = post.getNumberOfPassengers();
+        this.viewCount = post.getViewCount();
+        this.user = post.getUser();
+        this.fileName = post.getFileName();
+        this.filePath = post.getFilePath();
+        this.verifyFinish = post.getVerifyFinish();
+        this.participants = post.getParticipants();
+    }
+}
