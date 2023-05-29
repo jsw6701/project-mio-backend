@@ -45,10 +45,6 @@ public class AuthService {
             else {
                 GoogleOAuth2UserInfo userInfo = new GoogleOAuth2UserInfo(googleIdToken.getPayload());
 
-                if(!userInfo.getEmail().contains("@daejin.ac.kr")){
-                    throw new Exception("INVALID_TOKEN");
-                }
-
                 if(!userRepository.existsByEmail(userInfo.getEmail())){
                     UserEntity userEntity = new UserEntity(userInfo);
                     userRepository.save(userEntity);
@@ -56,7 +52,7 @@ public class AuthService {
                 return sendGenerateJwtToken(userInfo.getEmail(), userInfo.getName());
             }
         } catch (Exception e) {
-            throw new Exception("INVALID_TOKEN OR It isn't Daejin Email");
+            throw new Exception("INVALID_TOKEN");
         }
     }
 
