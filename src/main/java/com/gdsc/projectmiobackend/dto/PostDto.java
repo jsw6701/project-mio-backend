@@ -9,7 +9,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Getter
@@ -21,7 +23,8 @@ public class PostDto {
     private String title;
     private String content;
     private LocalDateTime createDate;
-    private LocalDateTime targetDate;
+    private LocalDate targetDate;
+    private LocalTime targetTime;
     private Category category;
     private Boolean verifyGoReturn;
     private Integer numberOfPassengers;
@@ -37,6 +40,7 @@ public class PostDto {
         this.content = post.getContent();
         this.createDate = post.getCreateDate();
         this.targetDate = post.getTargetDate();
+        this.targetTime = post.getTargetTime();
         this.category = post.getCategory();
         this.verifyGoReturn = post.getVerifyGoReturn();
         this.numberOfPassengers = post.getNumberOfPassengers();

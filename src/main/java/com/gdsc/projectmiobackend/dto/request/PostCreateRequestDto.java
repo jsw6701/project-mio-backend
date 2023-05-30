@@ -7,10 +7,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.lang.Nullable;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Getter
 @Setter
@@ -28,7 +31,13 @@ public class PostCreateRequestDto {
     @NotEmpty(message="내용은 필수 항목입니다.")
     private String content;
 
-    private LocalDateTime targetDate;
+    @Schema(description = "타기로 한 날짜.", example = "2023-05-30")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate targetDate;
+
+    @Schema(description = "타기로 한 시간.", example = "10:30")
+    @DateTimeFormat(pattern = "HH:mm")
+    private LocalTime targetTime;
 
     //등하교 선택
     private Boolean verifyGoReturn;
@@ -59,6 +68,7 @@ public class PostCreateRequestDto {
                 .content(content)
                 .createDate(LocalDateTime.now())
                 .targetDate(targetDate)
+                .targetTime(targetTime)
                 .verifyGoReturn(verifyGoReturn)
                 .numberOfPassengers(numberOfPassengers)
                 .category(category)
