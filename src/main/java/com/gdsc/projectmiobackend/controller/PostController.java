@@ -9,6 +9,7 @@ import com.gdsc.projectmiobackend.entity.UserEntity;
 import com.gdsc.projectmiobackend.jwt.dto.UserInfo;
 import com.gdsc.projectmiobackend.service.PostService;
 import lombok.AllArgsConstructor;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -80,7 +81,8 @@ public class PostController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping
+    @PageableAsQueryParam
+    @GetMapping("/readAll")
     public ResponseEntity<Page<PostDto>> readAll(@PageableDefault(sort = "createDate", direction = Sort.Direction.DESC) Pageable pageable){
         System.out.println("read all");
 
@@ -89,6 +91,7 @@ public class PostController {
         return ResponseEntity.ok(postList);
     }
 
+    @PageableAsQueryParam
     @GetMapping("/viewCount")
     public ResponseEntity<Page<PostDto>> readAllByViewCount(@PageableDefault(sort = "viewCount", direction = Sort.Direction.DESC) Pageable pageable){
         System.out.println("read all");
@@ -98,6 +101,7 @@ public class PostController {
         return ResponseEntity.ok(postList);
     }
 
+    @PageableAsQueryParam
     @GetMapping("categoryPost/{categoryId}")
     public ResponseEntity<Page<PostDto>> readPostsByCategory(
             @PageableDefault(sort = "createDate", direction = Sort.Direction.DESC) Pageable pageable,
@@ -109,6 +113,7 @@ public class PostController {
         return ResponseEntity.ok(postsByCategoryList);
     }
 
+    @PageableAsQueryParam
     @GetMapping("memberPost/{userId}")
     public ResponseEntity<Page<PostDto>> readPostsByUser(
             @PageableDefault(sort = "createDate", direction = Sort.Direction.DESC) Pageable pageable,
