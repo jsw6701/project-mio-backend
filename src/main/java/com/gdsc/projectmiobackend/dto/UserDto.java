@@ -13,6 +13,7 @@ import lombok.Getter;
 public class UserDto {
     private Long id;
     private String email;
+    private String studentId;
     private String profileImageUrl;  // 파일 저장 경로
     private String name;
     private Boolean gender;
@@ -23,6 +24,7 @@ public class UserDto {
     public UserDto(UserEntity user) {
         this.id = user.getId();
         this.email = user.getEmail();
+        this.studentId = user.getStudentId();
         this.profileImageUrl = user.getProfileImageUrl();
         this.name = user.getName();
         this.gender = user.getGender();
