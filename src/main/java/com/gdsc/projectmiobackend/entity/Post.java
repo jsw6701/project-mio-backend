@@ -8,7 +8,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +37,9 @@ public class Post {
     private LocalDateTime createDate;
 
     // 카풀 날짜
-    private LocalDateTime targetDate;
+    private LocalDate targetDate;
+
+    private LocalTime targetTime;
 
     //등하교 선택
     private Boolean verifyGoReturn;
@@ -70,12 +74,13 @@ public class Post {
     private List<UserEntity> participants = new ArrayList<>();
 
     @Builder
-    public Post(Long postId, String title, String content, LocalDateTime createDate, LocalDateTime targetDate, Category category, Boolean verifyGoReturn, Integer numberOfPassengers, UserEntity user, Long viewCount, String fileName, String filePath, Boolean verifyFinish){
+    public Post(Long postId, String title, String content, LocalDateTime createDate, LocalDate targetDate, LocalTime targetTime, Category category, Boolean verifyGoReturn, Integer numberOfPassengers, UserEntity user, Long viewCount, String fileName, String filePath, Boolean verifyFinish){
         this.id = postId;
         this.title = title;
         this.content = content;
         this.createDate = createDate;
         this.targetDate = targetDate;
+        this.targetTime = targetTime;
         this.category = category;
         this.verifyGoReturn = verifyGoReturn;
         this.numberOfPassengers = numberOfPassengers;
@@ -92,6 +97,8 @@ public class Post {
                 .title(title)
                 .content(content)
                 .createDate(LocalDateTime.now())
+                .targetDate(targetDate)
+                .targetTime(targetTime)
                 .category(category)
                 .verifyGoReturn(verifyGoReturn)
                 .numberOfPassengers(numberOfPassengers)
