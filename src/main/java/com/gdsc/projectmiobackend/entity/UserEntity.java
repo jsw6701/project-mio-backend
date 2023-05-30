@@ -2,7 +2,6 @@ package com.gdsc.projectmiobackend.entity;
 
 
 import com.gdsc.projectmiobackend.common.RoleType;
-import com.gdsc.projectmiobackend.common.SocialType;
 import com.gdsc.projectmiobackend.common.Status;
 import com.gdsc.projectmiobackend.oauth.GoogleOAuth2UserInfo;
 import jakarta.annotation.Nullable;
@@ -22,6 +21,8 @@ public class UserEntity{
 
     @Column(nullable = false, unique = true)
     private String email;
+
+    private String studentId;
 
     private String profileImageUrl;  // 파일 저장 경로
 
@@ -43,6 +44,7 @@ public class UserEntity{
 
     public UserEntity(GoogleOAuth2UserInfo userInfo) {
         this.email = userInfo.getEmail();
+        this.studentId = userInfo.getEmail().split("@")[0];
         this.profileImageUrl = userInfo.getImageUrl();
         this.name = userInfo.getName();
         this.roleType = RoleType.MEMBER;

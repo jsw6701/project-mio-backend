@@ -95,4 +95,14 @@ public class AuthService {
     private TokenResponse createToken(String email, String name) {
         return tokenProvider.generateJwtToken(email, name, RoleType.MEMBER);
     }
+
+    @Transactional
+    public UserEntity getUserEntity(String email) throws Exception {
+        return userRepository.findByEmail(email).orElseThrow(() -> new Exception("INVALID_TOKEN"));
+    }
+
+    @Transactional
+    public UserEntity getUserEntity(Long userId) throws Exception {
+        return userRepository.findById(userId).orElseThrow(() -> new Exception("INVALID_TOKEN"));
+    }
 }
