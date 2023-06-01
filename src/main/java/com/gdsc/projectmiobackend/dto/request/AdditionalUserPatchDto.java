@@ -15,4 +15,6 @@ public class AdditionalUserPatchDto {
     //흡연여부
     private Boolean verifySmoker;
 
+    //계좌번호
+    private String accountNumber;
 }

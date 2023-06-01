@@ -65,6 +65,7 @@ public class AuthService {
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new Exception("INVALID_TOKEN"));
         userEntity.setGender(additionalUserPatchDto.getGender());
         userEntity.setVerifySmoker(additionalUserPatchDto.getVerifySmoker());
+        userEntity.setAccountNumber(additionalUserPatchDto.getAccountNumber());
         return userEntity;
     }
 
