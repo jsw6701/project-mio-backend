@@ -17,6 +17,7 @@ public class UserDto {
     private String profileImageUrl;  // 파일 저장 경로
     private String name;
     private Boolean gender;
+    private String accountNumber;
     private Boolean verifySmoker;
     private RoleType roleType;
     private Status status;
@@ -28,6 +29,7 @@ public class UserDto {
         this.profileImageUrl = user.getProfileImageUrl();
         this.name = user.getName();
         this.gender = user.getGender();
+        this.accountNumber = user.getAccountNumber();
         this.verifySmoker = user.getVerifySmoker();
         this.roleType = user.getRoleType();
         this.status = user.getStatus();
