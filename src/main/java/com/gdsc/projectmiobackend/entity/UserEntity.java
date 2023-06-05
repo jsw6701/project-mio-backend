@@ -4,6 +4,7 @@ package com.gdsc.projectmiobackend.entity;
 import com.gdsc.projectmiobackend.common.RoleType;
 import com.gdsc.projectmiobackend.common.Status;
 import com.gdsc.projectmiobackend.oauth.GoogleOAuth2UserInfo;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -27,6 +28,10 @@ public class UserEntity{
     private String profileImageUrl;  // 파일 저장 경로
 
     private String name;
+
+    @Nullable
+    @Schema(description = "계좌번호입니다.", example = "국민 123456-78-901234")
+    private String accountNumber;
 
     //성별
     @Nullable
