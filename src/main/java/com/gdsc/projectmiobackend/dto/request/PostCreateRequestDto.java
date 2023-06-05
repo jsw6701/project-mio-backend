@@ -39,10 +39,10 @@ public class PostCreateRequestDto {
     @DateTimeFormat(pattern = "HH:mm")
     private LocalTime targetTime;
 
-    //등하교 선택
+    @Schema(description = "등/하교 선택 true 등교, false 하교", example = "true")
     private Boolean verifyGoReturn;
 
-    //탑승자 수
+    @Schema(description = "운전자를 제외한 탑승 인원", example = "3")
     private Integer numberOfPassengers;
 
     @Nullable
@@ -54,10 +54,11 @@ public class PostCreateRequestDto {
     @Nullable
     private String filePath;
 
+    @Schema(description = "조회수", example = "0")
     @Nullable
     private Long viewCount;
 
-    //마감 여부
+    @Schema(description = "도착 여부 false: 진행중 true: 도착", example = "false")
     private Boolean verifyFinish;
 
 

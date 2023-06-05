@@ -8,6 +8,8 @@ import com.gdsc.projectmiobackend.entity.Post;
 import com.gdsc.projectmiobackend.entity.UserEntity;
 import com.gdsc.projectmiobackend.jwt.dto.UserInfo;
 import com.gdsc.projectmiobackend.service.PostService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
@@ -28,10 +30,12 @@ import java.util.UUID;
 
 @AllArgsConstructor
 @RestController
+@Tag(name = "게시글")
 public class PostController {
 
     private final PostService postService;
 
+    @Operation(summary = "게시글 생성")
     @PostMapping(value = "post/{categoryId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<PostDto> create(
             @ModelAttribute PostCreateRequestDto postCreateRequestDto,
@@ -62,6 +66,7 @@ public class PostController {
         return ResponseEntity.ok(new PostDto(post));
     }
 
+    @Operation(summary = "게시글 수정")
     @PatchMapping("post/{id}")
     public ResponseEntity<PostDto> update(
             @PathVariable Long id,
@@ -73,7 +78,8 @@ public class PostController {
         return ResponseEntity.ok(new PostDto(post));
     }
 
-    @DeleteMapping("post/{id}")
+    @Operation(summary = "게시글 삭제")
+    @RequestMapping(value = "post/{id}", method = {RequestMethod.DELETE, RequestMethod.GET})
     public ResponseEntity<?> delete(@PathVariable Long id, @AuthenticationPrincipal UserInfo user){
         System.out.println("delete");
 
@@ -81,6 +87,7 @@ public class PostController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "게시글 생성 날짜순 전체 조회")
     @PageableAsQueryParam
     @GetMapping("/readAll")
     public ResponseEntity<Page<PostDto>> readAll(@PageableDefault(sort = "createDate", direction = Sort.Direction.DESC) Pageable pageable){
@@ -91,6 +98,7 @@ public class PostController {
         return ResponseEntity.ok(postList);
     }
 
+    @Operation(summary = "게시글 조회수순 전체 조회")
     @PageableAsQueryParam
     @GetMapping("/viewCount")
     public ResponseEntity<Page<PostDto>> readAllByViewCount(@PageableDefault(sort = "viewCount", direction = Sort.Direction.DESC) Pageable pageable){
@@ -101,6 +109,7 @@ public class PostController {
         return ResponseEntity.ok(postList);
     }
 
+    @Operation(summary = "카테고리 ID로 게시글 생성순 전체 조회")
     @PageableAsQueryParam
     @GetMapping("categoryPost/{categoryId}")
     public ResponseEntity<Page<PostDto>> readPostsByCategory(
@@ -113,6 +122,7 @@ public class PostController {
         return ResponseEntity.ok(postsByCategoryList);
     }
 
+    @Operation(summary = "회원 ID로 게시글 생성순 전체 조회")
     @PageableAsQueryParam
     @GetMapping("memberPost/{userId}")
     public ResponseEntity<Page<PostDto>> readPostsByUser(
@@ -125,25 +135,35 @@ public class PostController {
         return ResponseEntity.ok(postsByMemberList);
     }
 
-    //상세페이지
+    @Operation(summary = "게시글 ID로 상세 조회")
     @GetMapping("detail/{id}")
     public ResponseEntity<PostDto> getPostById(@PathVariable Long id){
         Post post = postService.showDetailPost(id);
         return ResponseEntity.ok(new PostDto(post));
     }
 
+    @Operation(summary = "유저 게시글 참여")
     @PostMapping("/{postId}/participate")
     public ResponseEntity<Void> participateInPost(@PathVariable Long postId, @AuthenticationPrincipal UserInfo user) {
         postService.participateInPost(postId, user.getEmail());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Operation(summary = "유저 게시글 참여 취소")
+    @RequestMapping(value = "/{postId}/participate", method = {RequestMethod.DELETE, RequestMethod.GET})
+    public ResponseEntity<Void> cancelParticipateInPost(@PathVariable Long postId, @AuthenticationPrincipal UserInfo user) {
+        postService.cancelParticipateInPost(postId, user.getEmail());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Operation(summary = "게시글 별 참여자 조회")
     @GetMapping("/{postId}/participants")
     public ResponseEntity<List<UserEntity>> getParticipantsByPostId(@PathVariable Long postId) {
         List<UserEntity> participants = postService.getParticipantsByPostId(postId);
         return new ResponseEntity<>(participants, HttpStatus.OK);
     }
 
+    @Operation(summary = "유저가 참여한 게시글 조회")
     @PageableAsQueryParam
     @GetMapping("/user/participants")
     public ResponseEntity<Page<PostDto>> getParticipantsByUserId(@AuthenticationPrincipal UserInfo user,

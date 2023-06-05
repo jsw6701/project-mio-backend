@@ -5,6 +5,7 @@ import com.gdsc.projectmiobackend.dto.LogoutRequest;
 import com.gdsc.projectmiobackend.dto.SocialLoginRequest;
 import com.gdsc.projectmiobackend.jwt.dto.TokenResponse;
 import com.gdsc.projectmiobackend.jwt.dto.UserInfo;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,9 +16,10 @@ import java.security.GeneralSecurityException;
 
 @RestController
 @RequiredArgsConstructor
-
+@Tag(name = "구글 로그인")
 public class AuthController {
     private final AuthService authService;
+
 
     @PostMapping("/auth/google")
     public ResponseEntity<TokenResponse> googleLogin(@RequestBody SocialLoginRequest socialLoginRequest) throws Exception {

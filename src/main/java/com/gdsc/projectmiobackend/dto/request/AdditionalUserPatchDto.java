@@ -1,5 +1,6 @@
 package com.gdsc.projectmiobackend.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 
@@ -9,12 +10,12 @@ import lombok.*;
 @NoArgsConstructor
 public class AdditionalUserPatchDto {
 
-    //성별
+    @Schema(description = "성별 false: 남성 true: 여성", example = "false")
     private Boolean gender;
 
-    //흡연여부
+    @Schema(description = "흡연 여부 false: 비흡연 true: 흡연", example = "false")
     private Boolean verifySmoker;
 
-    //계좌번호
+    @Schema(description = "계좌번호", example = "국민 1234567890")
     private String accountNumber;
 }
