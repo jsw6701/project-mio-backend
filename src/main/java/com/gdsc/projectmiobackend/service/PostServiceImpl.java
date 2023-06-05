@@ -123,4 +123,14 @@ public class PostServiceImpl implements PostService{
         this.postRepository.save(post);
         return postRepository.findById(id).orElse(null);
     }
+
+    @Override
+    public void cancelParticipateInPost(Long postId, String email) {
+        UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Post ID: " + postId));
+
+        post.getParticipants().remove(user);
+        postRepository.save(post);
+    }
 }

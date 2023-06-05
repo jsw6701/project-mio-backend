@@ -36,4 +36,5 @@ public interface PostService {
 
     List<UserEntity> getParticipantsByPostId(Long postId);
 
+    void cancelParticipateInPost(Long postId, String email);
 }
