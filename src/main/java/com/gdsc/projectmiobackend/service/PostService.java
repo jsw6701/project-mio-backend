@@ -28,6 +28,8 @@ public interface PostService {
 
     Page<PostDto> findByMemberId(Long userId, Pageable pageable);
 
+    Page<PostDto> getPostIdsByUserEmail(String email, Pageable pageable);
+
     Post showDetailPost(Long id);
 
     void participateInPost(Long postId, String email);
