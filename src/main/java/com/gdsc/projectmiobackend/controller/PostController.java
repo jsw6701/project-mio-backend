@@ -143,4 +143,12 @@ public class PostController {
         List<UserEntity> participants = postService.getParticipantsByPostId(postId);
         return new ResponseEntity<>(participants, HttpStatus.OK);
     }
+
+    @PageableAsQueryParam
+    @GetMapping("/user/participants")
+    public ResponseEntity<Page<PostDto>> getParticipantsByUserId(@AuthenticationPrincipal UserInfo user,
+                                                              @PageableDefault(sort = "targetDate", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<PostDto> posts = postService.getPostIdsByUserEmail(user.getEmail(), pageable);
+        return ResponseEntity.ok(posts);
+    }
 }

@@ -108,6 +108,12 @@ public class PostServiceImpl implements PostService{
     }
 
     @Override
+    public Page<PostDto> getPostIdsByUserEmail(String email, Pageable pageable) {
+        Page<Post> posts = postRepository.findByParticipants_Id(userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다.")).getId(), pageable);
+        return posts.map(Post::toDto);
+    }
+
+    @Override
     public Post showDetailPost(Long id){
 
         Post post = this.findById(id);
