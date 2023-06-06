@@ -50,7 +50,7 @@ public class PostServiceImpl implements PostService{
         Category category = categoryRepository.findById(postPatchRequestDto.getCategoryId()).orElseThrow(() -> new IllegalArgumentException("TODO 생성실패"));
 
         if (!Objects.equals(post.getUser().getEmail(), user.getEmail())) {
-            throw new IllegalStateException("해당 글을 삭제할 권한이 없습니다.");
+            throw new IllegalStateException("해당 글을 수정할 권한이 없습니다.");
         }
 
         post.setCategory(category);
@@ -65,7 +65,7 @@ public class PostServiceImpl implements PostService{
         Post post = this.findById(id);
 
         if (!Objects.equals(post.getUser().getEmail(), user.getEmail())) {
-            throw new IllegalStateException("해당 글을 삭제할 권한이 없습니다.");
+            throw new IllegalStateException("해당 글을 수정할 권한이 없습니다.");
         }
 
         post.setVerifyFinish(postPatchRequestDto.getVerifyFinish());
@@ -76,7 +76,7 @@ public class PostServiceImpl implements PostService{
     public void deletePostList(Long id, String email) {
         UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
         Post post = this.findById(id);
-        if (!Objects.equals(post.getUser().getEmail(), email)) {
+        if (!Objects.equals(post.getUser().getEmail(), user.getEmail())) {
             throw new IllegalStateException("해당 글을 삭제할 권한이 없습니다.");
         }
         postRepository.deleteById(id);
