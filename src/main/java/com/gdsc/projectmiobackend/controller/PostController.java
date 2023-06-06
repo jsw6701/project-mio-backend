@@ -4,8 +4,8 @@ package com.gdsc.projectmiobackend.controller;
 import com.gdsc.projectmiobackend.dto.PostDto;
 import com.gdsc.projectmiobackend.dto.request.PostCreateRequestDto;
 import com.gdsc.projectmiobackend.dto.request.PostPatchRequestDto;
+import com.gdsc.projectmiobackend.dto.request.PostVerifyFinishRequestDto;
 import com.gdsc.projectmiobackend.entity.Post;
-import com.gdsc.projectmiobackend.entity.UserEntity;
 import com.gdsc.projectmiobackend.jwt.dto.UserInfo;
 import com.gdsc.projectmiobackend.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,7 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.util.List;
 import java.util.UUID;
 
 
@@ -78,8 +76,20 @@ public class PostController {
         return ResponseEntity.ok(new PostDto(post));
     }
 
+    @Operation(summary = "게시글 완료 수정")
+    @PatchMapping("post/verfiyFinish/{id}")
+    public ResponseEntity<PostDto> update(
+            @PathVariable Long id,
+            @RequestBody PostVerifyFinishRequestDto patchRequestDto,
+            @AuthenticationPrincipal UserInfo user){
+        System.out.println("update");
+
+        Post post = postService.updateFinishById(id, patchRequestDto, user.getEmail());
+        return ResponseEntity.ok(new PostDto(post));
+    }
+
     @Operation(summary = "게시글 삭제")
-    @RequestMapping(value = "post/{id}", method = {RequestMethod.DELETE, RequestMethod.GET})
+    @DeleteMapping("post/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id, @AuthenticationPrincipal UserInfo user){
         System.out.println("delete");
 
@@ -140,35 +150,5 @@ public class PostController {
     public ResponseEntity<PostDto> getPostById(@PathVariable Long id){
         Post post = postService.showDetailPost(id);
         return ResponseEntity.ok(new PostDto(post));
-    }
-
-    @Operation(summary = "유저 게시글 참여")
-    @PostMapping("/{postId}/participate")
-    public ResponseEntity<Void> participateInPost(@PathVariable Long postId, @AuthenticationPrincipal UserInfo user) {
-        postService.participateInPost(postId, user.getEmail());
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @Operation(summary = "유저 게시글 참여 취소")
-    @RequestMapping(value = "/{postId}/participate", method = {RequestMethod.DELETE, RequestMethod.GET})
-    public ResponseEntity<Void> cancelParticipateInPost(@PathVariable Long postId, @AuthenticationPrincipal UserInfo user) {
-        postService.cancelParticipateInPost(postId, user.getEmail());
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @Operation(summary = "게시글 별 참여자 조회")
-    @GetMapping("/{postId}/participants")
-    public ResponseEntity<List<UserEntity>> getParticipantsByPostId(@PathVariable Long postId) {
-        List<UserEntity> participants = postService.getParticipantsByPostId(postId);
-        return new ResponseEntity<>(participants, HttpStatus.OK);
-    }
-
-    @Operation(summary = "유저가 참여한 게시글 조회")
-    @PageableAsQueryParam
-    @GetMapping("/user/participants")
-    public ResponseEntity<Page<PostDto>> getParticipantsByUserId(@AuthenticationPrincipal UserInfo user,
-                                                              @PageableDefault(sort = "targetDate", direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<PostDto> posts = postService.getPostIdsByUserEmail(user.getEmail(), pageable);
-        return ResponseEntity.ok(posts);
     }
 }

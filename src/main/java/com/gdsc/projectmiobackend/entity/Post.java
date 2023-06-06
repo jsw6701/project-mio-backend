@@ -57,7 +57,6 @@ public class Post {
 
     @ManyToOne
     @JoinColumn
-    // 카테고리 아이디
     private Category category;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
@@ -67,12 +66,8 @@ public class Post {
     @JoinColumn
     private UserEntity user;
 
-    @ManyToMany
-    @JoinTable(name = "post_participants",
-            joinColumns = @JoinColumn(name = "post_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private List<UserEntity> participants = new ArrayList<>();
-
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    private List<Participants> participants = new ArrayList<>();
     @Builder
     public Post(Long postId, String title, String content, LocalDateTime createDate, LocalDate targetDate, LocalTime targetTime, Category category, Boolean verifyGoReturn, Integer numberOfPassengers, UserEntity user, Long viewCount, String fileName, String filePath, Boolean verifyFinish){
         this.id = postId;
@@ -107,7 +102,6 @@ public class Post {
                 .filePath(filePath)
                 .viewCount(viewCount)
                 .verifyFinish(verifyFinish)
-                .participants(participants)
                 .build();
     }
 }

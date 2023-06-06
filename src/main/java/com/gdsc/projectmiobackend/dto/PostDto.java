@@ -49,6 +49,5 @@ public class PostDto {
         this.fileName = post.getFileName();
         this.filePath = post.getFilePath();
         this.verifyFinish = post.getVerifyFinish();
-        this.participants = post.getParticipants();
     }
 }
