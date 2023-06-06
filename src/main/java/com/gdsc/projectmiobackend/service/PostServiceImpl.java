@@ -4,6 +4,7 @@ package com.gdsc.projectmiobackend.service;
 import com.gdsc.projectmiobackend.dto.PostDto;
 import com.gdsc.projectmiobackend.dto.request.PostCreateRequestDto;
 import com.gdsc.projectmiobackend.dto.request.PostPatchRequestDto;
+import com.gdsc.projectmiobackend.dto.request.PostVerifyFinishRequestDto;
 import com.gdsc.projectmiobackend.entity.Category;
 import com.gdsc.projectmiobackend.entity.Post;
 import com.gdsc.projectmiobackend.entity.UserEntity;
@@ -15,7 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -60,6 +60,19 @@ public class PostServiceImpl implements PostService{
     }
 
     @Override
+    public Post updateFinishById(Long id, PostVerifyFinishRequestDto postPatchRequestDto, String email){
+        UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
+        Post post = this.findById(id);
+
+        if (!Objects.equals(post.getUser().getEmail(), user.getEmail())) {
+            throw new IllegalStateException("해당 글을 삭제할 권한이 없습니다.");
+        }
+
+        post.setVerifyFinish(postPatchRequestDto.getVerifyFinish());
+        return this.postRepository.save(post);
+    }
+
+    @Override
     public void deletePostList(Long id, String email) {
         UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
         Post post = this.findById(id);
@@ -89,29 +102,7 @@ public class PostServiceImpl implements PostService{
         return page.map(Post::toDto);
     }
 
-    @Override
-    public void participateInPost(Long postId, String email) {
-        UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Post ID: " + postId));
 
-        post.getParticipants().add(user);
-        postRepository.save(post);
-    }
-
-    @Override
-    public List<UserEntity> getParticipantsByPostId(Long postId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Post ID: " + postId));
-
-        return post.getParticipants();
-    }
-
-    @Override
-    public Page<PostDto> getPostIdsByUserEmail(String email, Pageable pageable) {
-        Page<Post> posts = postRepository.findByParticipants_Id(userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다.")).getId(), pageable);
-        return posts.map(Post::toDto);
-    }
 
     @Override
     public Post showDetailPost(Long id){
@@ -122,15 +113,5 @@ public class PostServiceImpl implements PostService{
 
         this.postRepository.save(post);
         return postRepository.findById(id).orElse(null);
-    }
-
-    @Override
-    public void cancelParticipateInPost(Long postId, String email) {
-        UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Post ID: " + postId));
-
-        post.getParticipants().remove(user);
-        postRepository.save(post);
     }
 }

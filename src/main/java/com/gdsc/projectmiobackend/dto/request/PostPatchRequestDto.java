@@ -35,6 +35,5 @@ public class PostPatchRequestDto {
     @Schema(description = "운전자를 제외한 탑승자 수", example = "3")
     private Integer numberOfPassengers;
 
-    @Schema(description = "도착 여부 false: 진행중 true: 도착", example = "false")
-    private Boolean verifyFinish;
+
 }
