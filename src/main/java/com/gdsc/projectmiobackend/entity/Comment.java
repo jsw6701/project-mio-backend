@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Setter
@@ -33,10 +34,16 @@ public class Comment {
     @JoinColumn
     private UserEntity user;
 
+    @ManyToOne
+    @JoinColumn(name = "parent_comment_id")
+    private Comment parentComment;
+
+    @OneToMany(mappedBy = "parentComment")
+    private List<Comment> childComments;
+
     public CommentDto toDto(){
         return CommentDto.builder()
                 .content(content)
-                //.like(likes)
                 .createDate(createDate)
                 .postId(post.getId())
                 .user(user)
