@@ -24,7 +24,7 @@ public class Participants {
     private UserEntity user;
 
     @Nullable
-    private Integer mannerScore;
+    private Boolean approval;
 
     public Participants(Post post, UserEntity user) {
         this.post = post;

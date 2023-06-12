@@ -23,9 +23,9 @@ public class ParticipantsController {
     private final PostParticipationService participantsService;
     @Operation(summary = "유저 게시글 참여")
     @PostMapping("/{postId}/participate")
-    public ResponseEntity<Void> participateInPost(@PathVariable Long postId, @AuthenticationPrincipal UserInfo user) {
-        participantsService.participateInPost(postId, user.getEmail());
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<String> participateInPost(@PathVariable Long postId, @AuthenticationPrincipal UserInfo user) {
+
+        return ResponseEntity.ok(participantsService.participateInPost(postId, user.getEmail()));
     }
 
     @Operation(summary = "게시글 별 참여자 조회")
@@ -49,5 +49,20 @@ public class ParticipantsController {
 
         List<PostDto> posts = participantsService.getPostIdsByUserEmail(user.getEmail());
         return ResponseEntity.ok(posts);
+    }
+
+    @Operation(summary = "게시글 참여 승인")
+    @PatchMapping("/{participantId}/participate")
+    public ResponseEntity<Void> participateInParticipant(@PathVariable Long participantId, @AuthenticationPrincipal UserInfo user) {
+        participantsService.participateApproval(participantId, user.getEmail());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Operation(summary = "유저별 카풀 승인 현황")
+    @GetMapping("/user/participants/carpool")
+    public ResponseEntity<PostDto> getParticipantsByUserIdAndCarpool(@AuthenticationPrincipal UserInfo user) {
+
+        PostDto post = participantsService.getApprovalUser(user.getEmail());
+        return ResponseEntity.ok(post);
     }
 }
