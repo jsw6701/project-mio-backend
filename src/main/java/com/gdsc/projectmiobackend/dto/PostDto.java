@@ -30,8 +30,6 @@ public class PostDto {
     private Integer numberOfPassengers;
     private UserEntity user;
     private Long viewCount;
-    private String fileName;
-    private String filePath;
     private Boolean verifyFinish;
     private List<UserEntity> participants;
     public PostDto(Post post){
@@ -46,8 +44,6 @@ public class PostDto {
         this.numberOfPassengers = post.getNumberOfPassengers();
         this.viewCount = post.getViewCount();
         this.user = post.getUser();
-        this.fileName = post.getFileName();
-        this.filePath = post.getFilePath();
         this.verifyFinish = post.getVerifyFinish();
     }
 }
