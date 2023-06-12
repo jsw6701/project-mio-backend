@@ -9,7 +9,6 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.lang.Nullable;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -45,15 +44,6 @@ public class PostCreateRequestDto {
     @Schema(description = "운전자를 제외한 탑승 인원", example = "3")
     private Integer numberOfPassengers;
 
-    @Nullable
-    private MultipartFile file;
-
-    @Nullable
-    private String fileName;
-
-    @Nullable
-    private String filePath;
-
     @Schema(description = "조회수", example = "0")
     @Nullable
     private Long viewCount;
@@ -73,8 +63,6 @@ public class PostCreateRequestDto {
                 .verifyGoReturn(verifyGoReturn)
                 .numberOfPassengers(numberOfPassengers)
                 .category(category)
-                .fileName(fileName)
-                .filePath(filePath)
                 .viewCount(viewCount)
                 .user(user)
                 .verifyFinish(verifyFinish)

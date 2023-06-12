@@ -16,14 +16,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-import java.util.UUID;
 
 
 @AllArgsConstructor
@@ -34,7 +29,7 @@ public class PostController {
     private final PostService postService;
 
     @Operation(summary = "게시글 생성")
-    @PostMapping(value = "post/{categoryId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(value = "post/{categoryId}")
     public ResponseEntity<PostDto> create(
             @ModelAttribute PostCreateRequestDto postCreateRequestDto,
             @PathVariable Long categoryId,
@@ -42,23 +37,6 @@ public class PostController {
         System.out.println("create");
 
         postCreateRequestDto.setViewCount(0L);
-
-        MultipartFile file = postCreateRequestDto.getFile();
-
-        if(file != null){
-            String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files";
-
-            UUID uuid = UUID.randomUUID();
-
-            String fileName = uuid + "_" + file.getOriginalFilename();
-
-            File saveFile = new File(projectPath, fileName);
-
-            file.transferTo(saveFile);
-
-            postCreateRequestDto.setFileName(fileName);
-            postCreateRequestDto.setFilePath("/files/" + fileName);
-        }
 
         Post post = this.postService.addPostList(postCreateRequestDto, categoryId, user.getEmail());
         return ResponseEntity.ok(new PostDto(post));

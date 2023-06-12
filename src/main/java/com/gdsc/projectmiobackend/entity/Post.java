@@ -49,10 +49,6 @@ public class Post {
 
     private Long viewCount;
 
-    private String fileName;
-
-    private String filePath;
-
     private Boolean verifyFinish;
 
     @ManyToOne
@@ -69,7 +65,7 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
     private List<Participants> participants = new ArrayList<>();
     @Builder
-    public Post(Long postId, String title, String content, LocalDateTime createDate, LocalDate targetDate, LocalTime targetTime, Category category, Boolean verifyGoReturn, Integer numberOfPassengers, UserEntity user, Long viewCount, String fileName, String filePath, Boolean verifyFinish){
+    public Post(Long postId, String title, String content, LocalDateTime createDate, LocalDate targetDate, LocalTime targetTime, Category category, Boolean verifyGoReturn, Integer numberOfPassengers, UserEntity user, Long viewCount, Boolean verifyFinish){
         this.id = postId;
         this.title = title;
         this.content = content;
@@ -81,8 +77,6 @@ public class Post {
         this.numberOfPassengers = numberOfPassengers;
         this.user = user;
         this.viewCount = viewCount;
-        this.fileName = fileName;
-        this.filePath = filePath;
         this.verifyFinish = verifyFinish;
     }
 
@@ -98,8 +92,6 @@ public class Post {
                 .verifyGoReturn(verifyGoReturn)
                 .numberOfPassengers(numberOfPassengers)
                 .user(user)
-                .fileName(fileName)
-                .filePath(filePath)
                 .viewCount(viewCount)
                 .verifyFinish(verifyFinish)
                 .build();
