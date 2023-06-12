@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -16,11 +17,11 @@ public class CommentDto {
 
     private String content;
 
-    private Integer like;
-
     private LocalDateTime createDate;
 
     private Long postId;
 
     private UserEntity user;
+
+    private List<CommentDto> childComments;
 }
