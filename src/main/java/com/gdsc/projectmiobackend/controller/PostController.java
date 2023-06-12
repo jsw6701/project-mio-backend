@@ -16,9 +16,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.util.UUID;
 
 
 @AllArgsConstructor
@@ -29,7 +34,7 @@ public class PostController {
     private final PostService postService;
 
     @Operation(summary = "게시글 생성")
-    @PostMapping(value = "post/{categoryId}")
+    @PostMapping(value = "post/{categoryId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<PostDto> create(
             @ModelAttribute PostCreateRequestDto postCreateRequestDto,
             @PathVariable Long categoryId,
