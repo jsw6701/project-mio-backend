@@ -22,15 +22,25 @@ public class PostParticipationServiceImpl implements PostParticipationService {
     private final ParticipantsRepository participantsRepository;
 
     @Override
-    public void participateInPost(Long postId, String email) {
+    public String participateInPost(Long postId, String email) {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Post ID: " + postId));
 
+        List<Participants> participants1 = participantsRepository.findByUserId(user.getId());
+
+        for (Participants p : participants1) {
+            if(p.getApproval()==true){
+                return "다른 카풀에 이미 승인되었습니다.";
+            }
+        }
+
         Participants participants = new Participants(post, user);
 
         participantsRepository.save(participants);
+
+        return "카풀 예약이 완료되었습니다.";
     }
 
     @Override
@@ -63,5 +73,39 @@ public class PostParticipationServiceImpl implements PostParticipationService {
         return posts.stream()
                 .map(Post::toDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void participateApproval(Long participateId, String email) {
+        Participants participants = participantsRepository.findById(participateId).orElseThrow(() -> new IllegalArgumentException("Invalid Participate ID: " + participateId));
+        Post post = participants.getPost().getUser().getEmail().equals(email) ? participants.getPost() : null;
+        if(post == null){
+            throw new IllegalArgumentException("해당 유저는 이 게시글의 주최자가 아닙니다.");
+        }
+
+        participants.setApproval(true);
+
+        UserEntity user = participants.getUser();
+
+        List<Participants> participants1 = participantsRepository.findByUserId(user.getId());
+
+        for (Participants p : participants1) {
+            if (!p.getId().equals(participateId)) {
+                participantsRepository.delete(p);
+            }
+        }
+
+        participantsRepository.save(participants);
+    }
+
+    public PostDto getApprovalUser(String email){
+        UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
+        List<Participants> participants = participantsRepository.findByUserId(user.getId());
+        for (Participants participant : participants) {
+            if(participant.getApproval()){
+                return participant.getPost().toDto();
+            }
+        }
+        return null;
     }
 }
