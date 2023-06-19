@@ -55,6 +55,8 @@ public class Post {
 
     private Double longitude;
 
+    private Long bookMarkCount;
+
     @ManyToOne
     @JoinColumn
     private Category category;

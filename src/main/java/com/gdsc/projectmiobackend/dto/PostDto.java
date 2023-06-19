@@ -34,6 +34,7 @@ public class PostDto {
     private List<UserEntity> participants;
     private Double latitude;
     private Double longitude;
+    private Long bookMarkCount;
     public PostDto(Post post){
         this.postId = post.getId();
         this.title = post.getTitle();
@@ -49,5 +50,6 @@ public class PostDto {
         this.verifyFinish = post.getVerifyFinish();
         this.latitude = post.getLatitude();
         this.longitude = post.getLongitude();
+        this.bookMarkCount = post.getBookMarkCount();
     }
 }
