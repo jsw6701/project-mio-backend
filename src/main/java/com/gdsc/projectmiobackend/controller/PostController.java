@@ -148,6 +148,7 @@ public class PostController {
         return ResponseEntity.ok(new PostDto(post));
     }
 
+    @Operation(summary = "위도 경도에 포함된 게시글 리스트 조회")
     @GetMapping("post/location")
     public ResponseEntity<List<PostDto>> readPostByLatitudeAndLongitude(@RequestParam("latitude") Double latitude, @RequestParam("longitude") Double longitude){
         System.out.println("read all");
