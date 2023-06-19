@@ -8,10 +8,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 public interface PostRepository extends JpaRepository<Post, Long> {
 
     Page<Post> findByCategory(Category category, Pageable pageable);
 
     Page<Post> findByUser(UserEntity user, Pageable pageable);
 
+    List<Post> findByLatitudeAndLongitude(Double latitude, Double longitude);
 }
