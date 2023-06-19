@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.io.IOException;
+import java.util.List;
 
 public interface PostService {
 
@@ -30,4 +31,6 @@ public interface PostService {
     Page<PostDto> findByMemberId(Long userId, Pageable pageable);
 
     Post showDetailPost(Long id);
+
+    List<PostDto> findByLatitudeAndLongitude(Double latitude, Double longitude);
 }
