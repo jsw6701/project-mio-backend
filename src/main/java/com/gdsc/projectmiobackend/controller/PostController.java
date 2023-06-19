@@ -9,13 +9,14 @@ import com.gdsc.projectmiobackend.entity.Post;
 import com.gdsc.projectmiobackend.jwt.dto.UserInfo;
 import com.gdsc.projectmiobackend.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
-import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -79,9 +80,13 @@ public class PostController {
     }
 
     @Operation(summary = "게시글 생성 날짜순 전체 조회")
-    @PageableAsQueryParam
+    @Parameters({
+            @Parameter(name = "sort", description = "sort specification",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "createDate,desc"))
+    })
     @GetMapping("/readAll")
-    public ResponseEntity<Page<PostDto>> readAll(@PageableDefault(sort = "createDate", direction = Sort.Direction.DESC) Pageable pageable){
+    public ResponseEntity<Page<PostDto>> readAll(
+            @Parameter(hidden = true) Pageable pageable){
         System.out.println("read all");
 
         Page<PostDto> postList = this.postService.findPostList(pageable);
@@ -90,9 +95,13 @@ public class PostController {
     }
 
     @Operation(summary = "게시글 조회수순 전체 조회")
-    @PageableAsQueryParam
+    @Parameters({
+            @Parameter(name = "sort", description = "sort specification",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "viewCount,desc"))
+    })
     @GetMapping("/viewCount")
-    public ResponseEntity<Page<PostDto>> readAllByViewCount(@PageableDefault(sort = "viewCount", direction = Sort.Direction.DESC) Pageable pageable){
+    public ResponseEntity<Page<PostDto>> readAllByViewCount(
+            @Parameter(hidden = true) Pageable pageable){
         System.out.println("read all");
 
         Page<PostDto> postList = this.postService.findPostList(pageable);
@@ -101,10 +110,13 @@ public class PostController {
     }
 
     @Operation(summary = "카테고리 ID로 게시글 생성순 전체 조회")
-    @PageableAsQueryParam
+    @Parameters({
+            @Parameter(name = "sort", description = "sort specification",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "createDate,desc"))
+    })
     @GetMapping("categoryPost/{categoryId}")
     public ResponseEntity<Page<PostDto>> readPostsByCategory(
-            @PageableDefault(sort = "createDate", direction = Sort.Direction.DESC) Pageable pageable,
+            @Parameter(hidden = true) Pageable pageable,
             @PathVariable Long categoryId){
         System.out.println("Posts by category");
 
@@ -114,10 +126,13 @@ public class PostController {
     }
 
     @Operation(summary = "회원 ID로 게시글 생성순 전체 조회")
-    @PageableAsQueryParam
+    @Parameters({
+            @Parameter(name = "sort", description = "sort specification",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "createDate,desc"))
+    })
     @GetMapping("memberPost/{userId}")
     public ResponseEntity<Page<PostDto>> readPostsByUser(
-            @PageableDefault(sort = "createDate", direction = Sort.Direction.DESC) Pageable pageable,
+            @Parameter(hidden = true) Pageable pageable,
             @PathVariable Long userId){
         System.out.println("Posts by member");
 
