@@ -32,6 +32,8 @@ public class PostDto {
     private Long viewCount;
     private Boolean verifyFinish;
     private List<UserEntity> participants;
+    private Double latitude;
+    private Double longitude;
     public PostDto(Post post){
         this.postId = post.getId();
         this.title = post.getTitle();
@@ -45,5 +47,7 @@ public class PostDto {
         this.viewCount = post.getViewCount();
         this.user = post.getUser();
         this.verifyFinish = post.getVerifyFinish();
+        this.latitude = post.getLatitude();
+        this.longitude = post.getLongitude();
     }
 }

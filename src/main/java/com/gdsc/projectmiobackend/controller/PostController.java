@@ -21,6 +21,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @AllArgsConstructor
 @RestController
@@ -129,5 +131,14 @@ public class PostController {
     public ResponseEntity<PostDto> getPostById(@PathVariable Long id){
         Post post = postService.showDetailPost(id);
         return ResponseEntity.ok(new PostDto(post));
+    }
+
+    @GetMapping("post/location")
+    public ResponseEntity<List<PostDto>> readPostByLatitudeAndLongitude(@RequestParam("latitude") Double latitude, @RequestParam("longitude") Double longitude){
+        System.out.println("read all");
+
+        List<PostDto> postList = this.postService.findByLatitudeAndLongitude(latitude, longitude);
+
+        return ResponseEntity.ok(postList);
     }
 }

@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -102,8 +103,6 @@ public class PostServiceImpl implements PostService{
         return page.map(Post::toDto);
     }
 
-
-
     @Override
     public Post showDetailPost(Long id){
 
@@ -113,5 +112,11 @@ public class PostServiceImpl implements PostService{
 
         this.postRepository.save(post);
         return postRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public List<PostDto> findByLatitudeAndLongitude(Double latitude, Double longitude){
+        List<Post> postList = postRepository.findByLatitudeAndLongitude(latitude, longitude);
+        return postList.stream().map(Post::toDto).toList();
     }
 }

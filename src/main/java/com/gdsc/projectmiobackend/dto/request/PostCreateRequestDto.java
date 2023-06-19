@@ -51,6 +51,12 @@ public class PostCreateRequestDto {
     @Schema(description = "도착 여부 false: 진행중 true: 도착", example = "false")
     private Boolean verifyFinish;
 
+    @Schema(description = "위도", example = "37.123456")
+    private Double latitude;
+
+    @Schema(description = "경도", example = "127.123456")
+    private Double longitude;
+
 
     public Post toEntity(Category category, UserEntity user) {
 
