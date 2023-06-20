@@ -119,4 +119,11 @@ public class PostServiceImpl implements PostService{
         List<Post> postList = postRepository.findByLatitudeAndLongitude(latitude, longitude);
         return postList.stream().map(Post::toDto).toList();
     }
+
+    @Override
+    public String getApprovalUserCountByPost(Long postId){
+        Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("Invalid Post ID: " + postId));
+        String result = post.getParticipantsCount() + "/" + post.getNumberOfPassengers();
+        return result;
+    }
 }

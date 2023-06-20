@@ -57,6 +57,8 @@ public class Post {
 
     private Long bookMarkCount;
 
+    private Long participantsCount;
+
     @ManyToOne
     @JoinColumn
     private Category category;

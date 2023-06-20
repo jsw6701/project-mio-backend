@@ -157,4 +157,11 @@ public class PostController {
 
         return ResponseEntity.ok(postList);
     }
+
+    @Operation(summary = "게시글 현재 참여 인원")
+    @GetMapping("/{postId}/participants/count")
+    public ResponseEntity<String> getApprovalUserCountByPost(@PathVariable Long postId) {
+        String result = postService.getApprovalUserCountByPost(postId);
+        return ResponseEntity.ok(result);
+    }
 }

@@ -37,7 +37,7 @@ public class PostParticipationServiceImpl implements PostParticipationService {
         }
 
         Participants participants = new Participants(post, user);
-
+        participants.setApproval(false);
         participantsRepository.save(participants);
 
         return "카풀 예약이 완료되었습니다.";
@@ -79,12 +79,25 @@ public class PostParticipationServiceImpl implements PostParticipationService {
     public void participateApproval(Long participateId, String email) {
         Participants participants = participantsRepository.findById(participateId).orElseThrow(() -> new IllegalArgumentException("Invalid Participate ID: " + participateId));
         Post post = participants.getPost().getUser().getEmail().equals(email) ? participants.getPost() : null;
+
         if(post == null){
             throw new IllegalArgumentException("해당 유저는 이 게시글의 주최자가 아닙니다.");
         }
 
-        participants.setApproval(true);
+        if(participants.getApproval()){
+            throw new IllegalArgumentException("이미 승인된 유저입니다.");
+        }
 
+        if(post.getParticipantsCount() == null){
+            post.setParticipantsCount(0L);
+        }
+
+        if(post.getNumberOfPassengers() <= post.getParticipantsCount()){
+            throw new IllegalArgumentException("해당 게시글의 최대 탑승인원을 초과하였습니다.");
+        }
+
+        participants.setApproval(true);
+        post.setParticipantsCount(post.getParticipantsCount() + 1);
         UserEntity user = participants.getUser();
 
         List<Participants> participants1 = participantsRepository.findByUserId(user.getId());
@@ -98,6 +111,7 @@ public class PostParticipationServiceImpl implements PostParticipationService {
         participantsRepository.save(participants);
     }
 
+    @Override
     public PostDto getApprovalUser(String email){
         UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
         List<Participants> participants = participantsRepository.findByUserId(user.getId());
