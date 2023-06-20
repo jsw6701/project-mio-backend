@@ -33,4 +33,6 @@ public interface PostService {
     Post showDetailPost(Long id);
 
     List<PostDto> findByLatitudeAndLongitude(Double latitude, Double longitude);
+
+    String getApprovalUserCountByPost(Long postId);
 }
