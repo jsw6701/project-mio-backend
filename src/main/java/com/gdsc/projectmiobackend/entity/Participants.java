@@ -26,6 +26,9 @@ public class Participants {
     @Nullable
     private Boolean approval;
 
+    @Nullable
+    private Boolean verifyFinish;
+
     public Participants(Post post, UserEntity user) {
         this.post = post;
         this.user = user;

@@ -2,6 +2,7 @@ package com.gdsc.projectmiobackend.controller;
 
 
 import com.gdsc.projectmiobackend.dto.PostDto;
+import com.gdsc.projectmiobackend.dto.request.MannerUpdateRequestDto;
 import com.gdsc.projectmiobackend.dto.request.PostCreateRequestDto;
 import com.gdsc.projectmiobackend.dto.request.PostPatchRequestDto;
 import com.gdsc.projectmiobackend.dto.request.PostVerifyFinishRequestDto;
@@ -163,5 +164,35 @@ public class PostController {
     public ResponseEntity<String> getApprovalUserCountByPost(@PathVariable Long postId) {
         String result = postService.getApprovalUserCountByPost(postId);
         return ResponseEntity.ok(result);
+    }
+
+    @Operation(summary = "기사 매너 평가")
+    @PostMapping("/post/{postId}/evaluation/driver")
+    public ResponseEntity<?> updateDriverMannerScore(@PathVariable Long postId,
+                                                     @AuthenticationPrincipal UserInfo user,
+                                                     @RequestBody MannerUpdateRequestDto mannerUpdateRequestDto) {
+        postService.driverUpdateManner(postId, user.getEmail(), mannerUpdateRequestDto);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "탑승자 매너 평가")
+    @PostMapping("/post/{userId}/evaluation/passenger")
+    public ResponseEntity<?> updatePassengersMannerScore(@PathVariable Long userId,
+                                                         @AuthenticationPrincipal UserInfo user,
+                                                         @RequestBody MannerUpdateRequestDto mannerUpdateRequestDto) {
+        postService.updateParticipatesManner(userId, mannerUpdateRequestDto, user.getEmail());
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "탑승자로 참여한 게시글")
+    @Parameters({
+            @Parameter(name = "sort", description = "sort specification",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "createDate,desc"))
+    })
+    @GetMapping("/post/participate")
+    public ResponseEntity<Page<PostDto>> readPostByParticipate(@AuthenticationPrincipal UserInfo user,
+                                                               @Parameter(hidden = true) Pageable pageable) {
+        Page<PostDto> postList = this.postService.findByParticipate(user.getEmail(), pageable);
+        return ResponseEntity.ok(postList);
     }
 }
