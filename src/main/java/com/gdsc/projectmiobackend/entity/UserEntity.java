@@ -47,6 +47,10 @@ public class UserEntity{
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    private Long mannerCount;
+
+    private String grade;
+
     public UserEntity(GoogleOAuth2UserInfo userInfo) {
         this.email = userInfo.getEmail();
         this.studentId = userInfo.getEmail().split("@")[0];

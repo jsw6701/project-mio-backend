@@ -31,13 +31,14 @@ public class PostParticipationServiceImpl implements PostParticipationService {
         List<Participants> participants1 = participantsRepository.findByUserId(user.getId());
 
         for (Participants p : participants1) {
-            if(p.getApproval()==true){
+            if(p.getApproval()){
                 return "다른 카풀에 이미 승인되었습니다.";
             }
         }
 
         Participants participants = new Participants(post, user);
         participants.setApproval(false);
+        participants.setVerifyFinish(false);
         participantsRepository.save(participants);
 
         return "카풀 예약이 완료되었습니다.";
@@ -104,7 +105,8 @@ public class PostParticipationServiceImpl implements PostParticipationService {
 
         for (Participants p : participants1) {
             if (!p.getId().equals(participateId)) {
-                participantsRepository.delete(p);
+                if(!p.getVerifyFinish())
+                    participantsRepository.delete(p);
             }
         }
 

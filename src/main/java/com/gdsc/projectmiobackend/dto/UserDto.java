@@ -21,7 +21,8 @@ public class UserDto {
     private Boolean verifySmoker;
     private RoleType roleType;
     private Status status;
-
+    private Long mannerCount;
+    private String grade;
     public UserDto(UserEntity user) {
         this.id = user.getId();
         this.email = user.getEmail();
@@ -33,5 +34,7 @@ public class UserDto {
         this.verifySmoker = user.getVerifySmoker();
         this.roleType = user.getRoleType();
         this.status = user.getStatus();
+        this.mannerCount = user.getMannerCount();
+        this.grade = user.getGrade();
     }
 }
