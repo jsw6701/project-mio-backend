@@ -17,4 +17,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByUser(UserEntity user, Pageable pageable);
 
     List<Post> findByLatitudeAndLongitude(Double latitude, Double longitude);
+
 }

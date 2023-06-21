@@ -2,17 +2,21 @@ package com.gdsc.projectmiobackend.service;
 
 
 import com.gdsc.projectmiobackend.dto.PostDto;
+import com.gdsc.projectmiobackend.dto.request.MannerUpdateRequestDto;
 import com.gdsc.projectmiobackend.dto.request.PostCreateRequestDto;
 import com.gdsc.projectmiobackend.dto.request.PostPatchRequestDto;
 import com.gdsc.projectmiobackend.dto.request.PostVerifyFinishRequestDto;
 import com.gdsc.projectmiobackend.entity.Category;
+import com.gdsc.projectmiobackend.entity.Participants;
 import com.gdsc.projectmiobackend.entity.Post;
 import com.gdsc.projectmiobackend.entity.UserEntity;
 import com.gdsc.projectmiobackend.repository.CategoryRepository;
+import com.gdsc.projectmiobackend.repository.ParticipantsRepository;
 import com.gdsc.projectmiobackend.repository.PostRepository;
 import com.gdsc.projectmiobackend.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +33,7 @@ public class PostServiceImpl implements PostService{
 
     private final UserRepository userRepository;
 
+    private final ParticipantsRepository participantsRepository;
 
     @Override
     public Post findById(Long id) {
@@ -70,6 +75,19 @@ public class PostServiceImpl implements PostService{
         }
 
         post.setVerifyFinish(postPatchRequestDto.getVerifyFinish());
+
+        List<Participants> participantsList = post.getParticipants();
+
+        for (Participants participants : participantsList) {
+            if(participants.getApproval()){
+                participants.setApproval(false);
+                participants.setVerifyFinish(true);
+            }
+            else{
+                this.participantsRepository.delete(participants);
+            }
+        }
+
         return this.postRepository.save(post);
     }
 
@@ -98,7 +116,7 @@ public class PostServiceImpl implements PostService{
 
     @Override
     public Page<PostDto> findByMemberId(Long userId, Pageable pageable){
-        UserEntity user = this.userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("카테고리가 없습니다."));
+        UserEntity user = this.userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("유저가 없습니다."));
         Page<Post> page = postRepository.findByUser(user, pageable);
         return page.map(Post::toDto);
     }
@@ -125,5 +143,113 @@ public class PostServiceImpl implements PostService{
         Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("Invalid Post ID: " + postId));
         String result = post.getParticipantsCount() + "/" + post.getNumberOfPassengers();
         return result;
+    }
+
+    @Override
+    public void driverUpdateManner(Long id, String email, MannerUpdateRequestDto mannerUpdateRequestDto){
+        UserEntity currentUser = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
+        Post post = this.findById(id);
+
+        if(currentUser.getMannerCount() == null){
+            currentUser.setMannerCount(0L);
+        }
+
+        if(!post.getVerifyFinish()){
+            throw new IllegalStateException("해당 글은 마감되지 않았습니다.");
+        }
+
+        List<Participants> participants = post.getParticipants();
+
+        UserEntity driver = post.getUser();
+
+        if(driver.getMannerCount() == null){
+            driver.setMannerCount(0L);
+        }
+
+        Long driverMannerCount = driver.getMannerCount();
+
+        if (!Objects.equals(post.getUser().getEmail(), currentUser.getEmail())) {
+            if(participants.stream().anyMatch(participant -> Objects.equals(participant.getUser().getEmail(), currentUser.getEmail()))){
+                if(mannerUpdateRequestDto.getManner().equals("good")) {
+                    driver.setMannerCount(driverMannerCount + 1);
+                } else if(mannerUpdateRequestDto.getManner().equals("bad")) {
+                    driver.setMannerCount(driverMannerCount - 1);
+                } else if(mannerUpdateRequestDto.getManner().equals("normal")) {
+                    driver.setMannerCount(driverMannerCount);
+                } else {
+                    throw new IllegalStateException("잘못된 평가입니다.");
+                }
+            }
+            else{
+                throw new IllegalStateException("해당 글에 참여하지 않았습니다.");
+            }
+        }
+        Long updateMannerCount = driver.getMannerCount();
+
+        driver.setGrade(calculateGrade(updateMannerCount));
+        this.userRepository.save(driver);
+    }
+
+    @Override
+    public void updateParticipatesManner(Long userId, MannerUpdateRequestDto mannerUpdateRequestDto, String email){
+        UserEntity targetUser = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
+        UserEntity currentUser = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
+
+        if(currentUser.getMannerCount() == null){
+            currentUser.setMannerCount(0L);
+        }
+        if(targetUser.getMannerCount() == null){
+            targetUser.setMannerCount(0L);
+        }
+
+        Long targetUserMannerCount = targetUser.getMannerCount();
+
+        if(mannerUpdateRequestDto.getManner().equals("good")) {
+            targetUser.setMannerCount(targetUserMannerCount + 1);
+        } else if(mannerUpdateRequestDto.getManner().equals("bad")) {
+            targetUser.setMannerCount(targetUserMannerCount - 1);
+        } else if(mannerUpdateRequestDto.getManner().equals("normal")) {
+            targetUser.setMannerCount(targetUserMannerCount);
+        } else {
+            throw new IllegalStateException("잘못된 평가입니다.");
+        }
+
+        targetUser.setGrade(calculateGrade(targetUser.getMannerCount()));
+    }
+
+    private String calculateGrade(Long mannerCount) {
+        if (mannerCount <= -1) {
+            return "F";
+        } else if (mannerCount <= 9) {
+            return "E";
+        } else if (mannerCount <= 19) {
+            return "D";
+        } else if (mannerCount <= 29) {
+            return "C";
+        } else if (mannerCount <= 39) {
+            return "B";
+        } else if (mannerCount <= 49) {
+            return "A";
+        } else if (mannerCount <= 59) {
+            return "S";
+        } else if (mannerCount <= 69) {
+            return "SS";
+        } else if (mannerCount <= 79) {
+            return "SSS";
+        } else if (mannerCount <= 89) {
+            return "SSSS";
+        } else if (mannerCount <= 99) {
+            return "SSSSS";
+        } else {
+            return "SSSSSS";
+        }
+    }
+
+    @Override
+    public Page<PostDto> findByParticipate(String email, Pageable pageable){
+        UserEntity user = this.userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저가 없습니다."));
+        List<Participants> participants = this.participantsRepository.findByUserId(user.getId());
+        Page<PostDto> page = new PageImpl<>(participants.stream().map(Participants::getPost).map(Post::toDto).toList(), pageable, participants.size());
+        return page;
     }
 }
