@@ -59,6 +59,8 @@ public class Post {
 
     private Long participantsCount;
 
+    private String location;
+
     @ManyToOne
     @JoinColumn
     private Category category;
@@ -73,7 +75,7 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
     private List<Participants> participants = new ArrayList<>();
     @Builder
-    public Post(Long postId, String title, String content, LocalDateTime createDate, LocalDate targetDate, LocalTime targetTime, Category category, Boolean verifyGoReturn, Integer numberOfPassengers, UserEntity user, Long viewCount, Boolean verifyFinish, Double latitude, Double longitude) {
+    public Post(Long postId, String title, String content, LocalDateTime createDate, LocalDate targetDate, LocalTime targetTime, Category category, Boolean verifyGoReturn, Integer numberOfPassengers, UserEntity user, Long viewCount, Boolean verifyFinish, Double latitude, Double longitude, String location) {
         this.id = postId;
         this.title = title;
         this.content = content;
@@ -88,6 +90,7 @@ public class Post {
         this.verifyFinish = verifyFinish;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.location = location;
     }
 
     public PostDto toDto() {
@@ -104,6 +107,9 @@ public class Post {
                 .user(user)
                 .viewCount(viewCount)
                 .verifyFinish(verifyFinish)
+                .latitude(latitude)
+                .longitude(longitude)
+                .location(location)
                 .build();
     }
 }

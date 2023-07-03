@@ -57,6 +57,8 @@ public class PostCreateRequestDto {
     @Schema(description = "경도", example = "127.123456")
     private Double longitude;
 
+    @Schema(description = "위치", example = "경기 포천시 호국로 1007")
+    private String location;
 
     public Post toEntity(Category category, UserEntity user) {
 
@@ -72,6 +74,9 @@ public class PostCreateRequestDto {
                 .viewCount(viewCount)
                 .user(user)
                 .verifyFinish(verifyFinish)
+                .latitude(latitude)
+                .longitude(longitude)
+                .location(location)
                 .build();
     }
 }
