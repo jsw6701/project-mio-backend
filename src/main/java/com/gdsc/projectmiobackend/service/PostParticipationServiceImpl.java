@@ -1,5 +1,6 @@
 package com.gdsc.projectmiobackend.service;
 
+import com.gdsc.projectmiobackend.common.ApprovalOrReject;
 import com.gdsc.projectmiobackend.dto.PostDto;
 import com.gdsc.projectmiobackend.entity.Participants;
 import com.gdsc.projectmiobackend.entity.Post;
@@ -31,13 +32,14 @@ public class PostParticipationServiceImpl implements PostParticipationService {
         List<Participants> participants1 = participantsRepository.findByUserId(user.getId());
 
         for (Participants p : participants1) {
-            if(p.getApproval()){
+            if(p.getApprovalOrReject() == ApprovalOrReject.APPROVAL) {
                 return "다른 카풀에 이미 승인되었습니다.";
             }
         }
 
         Participants participants = new Participants(post, user);
-        participants.setApproval(false);
+
+        participants.setApprovalOrReject(ApprovalOrReject.WAITING);
         participants.setVerifyFinish(false);
         participantsRepository.save(participants);
 
@@ -85,10 +87,6 @@ public class PostParticipationServiceImpl implements PostParticipationService {
             throw new IllegalArgumentException("해당 유저는 이 게시글의 주최자가 아닙니다.");
         }
 
-        if(participants.getApproval()){
-            throw new IllegalArgumentException("이미 승인된 유저입니다.");
-        }
-
         if(post.getParticipantsCount() == null){
             post.setParticipantsCount(0L);
         }
@@ -97,7 +95,7 @@ public class PostParticipationServiceImpl implements PostParticipationService {
             throw new IllegalArgumentException("해당 게시글의 최대 탑승인원을 초과하였습니다.");
         }
 
-        participants.setApproval(true);
+        participants.setApprovalOrReject(ApprovalOrReject.APPROVAL);
         post.setParticipantsCount(post.getParticipantsCount() + 1);
         UserEntity user = participants.getUser();
 
@@ -113,12 +111,34 @@ public class PostParticipationServiceImpl implements PostParticipationService {
         participantsRepository.save(participants);
     }
 
+    public void rejectParticipateInPost(Long participateId, String email){
+        Participants participants = participantsRepository.findById(participateId).orElseThrow(() -> new IllegalArgumentException("Invalid Participate ID: " + participateId));
+        Post post = participants.getPost().getUser().getEmail().equals(email) ? participants.getPost() : null;
+
+        if(post == null){
+            throw new IllegalArgumentException("해당 유저는 이 게시글의 주최자가 아닙니다.");
+        }
+
+        if(participants.getApprovalOrReject() == ApprovalOrReject.APPROVAL){
+            throw new IllegalArgumentException("이미 승인된 유저입니다.");
+        }
+
+        if(post.getParticipantsCount() == null){
+            post.setParticipantsCount(0L);
+        }
+
+        participants.setApprovalOrReject(ApprovalOrReject.REJECT);
+
+        participantsRepository.delete(participants);
+    }
+
+
     @Override
     public PostDto getApprovalUser(String email){
         UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
         List<Participants> participants = participantsRepository.findByUserId(user.getId());
         for (Participants participant : participants) {
-            if(participant.getApproval()){
+            if(participant.getApprovalOrReject() == ApprovalOrReject.APPROVAL){
                 return participant.getPost().toDto();
             }
         }

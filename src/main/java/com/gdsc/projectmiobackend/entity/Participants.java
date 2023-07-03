@@ -1,5 +1,6 @@
 package com.gdsc.projectmiobackend.entity;
 
+import com.gdsc.projectmiobackend.common.ApprovalOrReject;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -24,7 +25,8 @@ public class Participants {
     private UserEntity user;
 
     @Nullable
-    private Boolean approval;
+    @Enumerated(EnumType.STRING)
+    private ApprovalOrReject approvalOrReject;
 
     @Nullable
     private Boolean verifyFinish;
