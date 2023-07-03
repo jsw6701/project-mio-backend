@@ -37,6 +37,7 @@ public class PostDto {
     private Long bookMarkCount;
     private Long participantsCount;
     private String location;
+    private Long cost;
     public PostDto(Post post){
         this.postId = post.getId();
         this.title = post.getTitle();
@@ -55,5 +56,6 @@ public class PostDto {
         this.bookMarkCount = post.getBookMarkCount();
         this.participantsCount = post.getParticipantsCount();
         this.location = post.getLocation();
+        this.cost = post.getCost();
     }
 }
