@@ -40,4 +40,10 @@ public class PostPatchRequestDto {
 
     @Schema(description = "경도", example = "127.123456")
     private Double longitude;
+
+    @Schema(description = "위치", example = "경기 포천시 호국로 1007")
+    private String location;
+
+    @Schema(description = "비용", example = "3000")
+    private Long cost;
 }
