@@ -1,6 +1,7 @@
 package com.gdsc.projectmiobackend.service;
 
 
+import com.gdsc.projectmiobackend.common.ApprovalOrReject;
 import com.gdsc.projectmiobackend.dto.PostDto;
 import com.gdsc.projectmiobackend.dto.request.MannerUpdateRequestDto;
 import com.gdsc.projectmiobackend.dto.request.PostCreateRequestDto;
@@ -79,8 +80,8 @@ public class PostServiceImpl implements PostService{
         List<Participants> participantsList = post.getParticipants();
 
         for (Participants participants : participantsList) {
-            if(participants.getApproval()){
-                participants.setApproval(false);
+            if(participants.getApprovalOrReject() == ApprovalOrReject.APPROVAL){
+                participants.setApprovalOrReject(ApprovalOrReject.FINISH);
                 participants.setVerifyFinish(true);
             }
             else{
@@ -221,27 +222,25 @@ public class PostServiceImpl implements PostService{
         if (mannerCount <= -1) {
             return "F";
         } else if (mannerCount <= 9) {
-            return "E";
-        } else if (mannerCount <= 19) {
             return "D";
+        } else if (mannerCount <= 19) {
+            return "D+";
         } else if (mannerCount <= 29) {
             return "C";
         } else if (mannerCount <= 39) {
-            return "B";
+            return "C+";
         } else if (mannerCount <= 49) {
-            return "A";
+            return "B";
         } else if (mannerCount <= 59) {
-            return "S";
+            return "B+";
         } else if (mannerCount <= 69) {
-            return "SS";
+            return "A";
         } else if (mannerCount <= 79) {
-            return "SSS";
+            return "A+";
         } else if (mannerCount <= 89) {
-            return "SSSS";
-        } else if (mannerCount <= 99) {
-            return "SSSSS";
+            return "MIO 조교님";
         } else {
-            return "SSSSSS";
+            return "MIO 교수님";
         }
     }
 
