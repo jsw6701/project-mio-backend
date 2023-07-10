@@ -42,6 +42,13 @@ public class ParticipantsController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Operation(summary = "참여 거절하기")
+    @DeleteMapping("/{participantId}/reject")
+    public ResponseEntity<Void> rejectParticipateInPost(@PathVariable Long participantId, @AuthenticationPrincipal UserInfo user) {
+        participantsService.rejectParticipateInPost(participantId, user.getEmail());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @Operation(summary = "유저가 참여한 게시글 조회")
     @PageableAsQueryParam
     @GetMapping("/user/participants")

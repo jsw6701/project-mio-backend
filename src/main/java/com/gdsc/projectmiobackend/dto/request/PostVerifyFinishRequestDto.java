@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostVerifyFinishRequestDto {
-    @Schema(description = "도착 여부 false: 진행중 true: 도착", example = "false")
+    @Schema(description = "도착 여부 false: 진행중 true: 도착", example = "true")
     private Boolean verifyFinish;
 }

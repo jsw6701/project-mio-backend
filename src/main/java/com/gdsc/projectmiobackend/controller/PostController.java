@@ -18,7 +18,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +33,7 @@ public class PostController {
     private final PostService postService;
 
     @Operation(summary = "게시글 생성")
-    @PostMapping(value = "post/{categoryId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(value = "post/{categoryId}")
     public ResponseEntity<PostDto> create(
             @ModelAttribute PostCreateRequestDto postCreateRequestDto,
             @PathVariable Long categoryId,
@@ -83,7 +82,11 @@ public class PostController {
     @Operation(summary = "게시글 생성 날짜순 전체 조회")
     @Parameters({
             @Parameter(name = "sort", description = "sort specification",
-                    in = ParameterIn.QUERY, schema = @Schema(type = "createDate,desc"))
+                    in = ParameterIn.QUERY, schema = @Schema(type = "createDate,desc"), example = "createDate,desc"),
+            @Parameter(name = "page", description = "page number",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "integer", defaultValue = "0")),
+            @Parameter(name = "size", description = "page size",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "integer", defaultValue = "5"))
     })
     @GetMapping("/readAll")
     public ResponseEntity<Page<PostDto>> readAll(
@@ -95,10 +98,52 @@ public class PostController {
         return ResponseEntity.ok(postList);
     }
 
-    @Operation(summary = "게시글 조회수순 전체 조회")
+    @Operation(summary = "게시글 마감 날짜순 전체 조회")
     @Parameters({
             @Parameter(name = "sort", description = "sort specification",
-                    in = ParameterIn.QUERY, schema = @Schema(type = "viewCount,desc"))
+                    in = ParameterIn.QUERY, schema = @Schema(type = "targetDate,desc"), example = "targetDate,desc"),
+            @Parameter(name = "page", description = "page number",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "integer", defaultValue = "0")),
+            @Parameter(name = "size", description = "page size",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "integer", defaultValue = "5"))
+    })
+    @GetMapping("/readAll/targetDate")
+    public ResponseEntity<Page<PostDto>> readAllByTargetDate(
+            @Parameter(hidden = true) Pageable pageable){
+        System.out.println("read all");
+
+        Page<PostDto> postList = this.postService.findPostList(pageable);
+
+        return ResponseEntity.ok(postList);
+    }
+
+    @Operation(summary = "요금순 정렬")
+    @Parameters({
+            @Parameter(name = "sort", description = "sort specification",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "cost,desc"), example = "cost,asc"),
+            @Parameter(name = "page", description = "page number",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "integer", defaultValue = "0")),
+            @Parameter(name = "size", description = "page size",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "integer", defaultValue = "5"))
+    })
+    @GetMapping("/readAll/cost")
+    public ResponseEntity<Page<PostDto>> readAllByCost(
+            @Parameter(hidden = true) Pageable pageable){
+        System.out.println("read all");
+
+        Page<PostDto> postList = this.postService.findPostList(pageable);
+
+        return ResponseEntity.ok(postList);
+    }
+
+    @Operation(summary = "게시글 조회수 순 전체 조회")
+    @Parameters({
+            @Parameter(name = "sort", description = "sort specification",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "viewCount,desc"), example = "viewCount,desc"),
+            @Parameter(name = "page", description = "page number",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "integer", defaultValue = "0")),
+            @Parameter(name = "size", description = "page size",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "integer", defaultValue = "5"))
     })
     @GetMapping("/viewCount")
     public ResponseEntity<Page<PostDto>> readAllByViewCount(
@@ -113,7 +158,11 @@ public class PostController {
     @Operation(summary = "카테고리 ID로 게시글 생성순 전체 조회")
     @Parameters({
             @Parameter(name = "sort", description = "sort specification",
-                    in = ParameterIn.QUERY, schema = @Schema(type = "createDate,desc"))
+                    in = ParameterIn.QUERY, schema = @Schema(type = "createDate,desc"), example = "createDate,desc"),
+            @Parameter(name = "page", description = "page number",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "integer", defaultValue = "0")),
+            @Parameter(name = "size", description = "page size",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "integer", defaultValue = "5"))
     })
     @GetMapping("categoryPost/{categoryId}")
     public ResponseEntity<Page<PostDto>> readPostsByCategory(
@@ -129,7 +178,11 @@ public class PostController {
     @Operation(summary = "회원 ID로 게시글 생성순 전체 조회")
     @Parameters({
             @Parameter(name = "sort", description = "sort specification",
-                    in = ParameterIn.QUERY, schema = @Schema(type = "createDate,desc"))
+                    in = ParameterIn.QUERY, schema = @Schema(type = "createDate,desc"), example = "createDate,desc"),
+            @Parameter(name = "page", description = "page number",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "integer", defaultValue = "0")),
+            @Parameter(name = "size", description = "page size",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "integer", defaultValue = "5"))
     })
     @GetMapping("memberPost/{userId}")
     public ResponseEntity<Page<PostDto>> readPostsByUser(
@@ -187,7 +240,11 @@ public class PostController {
     @Operation(summary = "탑승자로 참여한 게시글")
     @Parameters({
             @Parameter(name = "sort", description = "sort specification",
-                    in = ParameterIn.QUERY, schema = @Schema(type = "createDate,desc"))
+                    in = ParameterIn.QUERY, schema = @Schema(type = "createDate,desc"), example = "createDate,desc"),
+            @Parameter(name = "page", description = "page number",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "integer", defaultValue = "0")),
+            @Parameter(name = "size", description = "page size",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "integer", defaultValue = "5"))
     })
     @GetMapping("/post/participate")
     public ResponseEntity<Page<PostDto>> readPostByParticipate(@AuthenticationPrincipal UserInfo user,
