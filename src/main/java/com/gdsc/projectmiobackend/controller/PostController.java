@@ -35,7 +35,7 @@ public class PostController {
     @Operation(summary = "게시글 생성")
     @PostMapping(value = "post/{categoryId}")
     public ResponseEntity<PostDto> create(
-            @ModelAttribute PostCreateRequestDto postCreateRequestDto,
+            @RequestBody PostCreateRequestDto postCreateRequestDto,
             @PathVariable Long categoryId,
             @AuthenticationPrincipal UserInfo user) throws Exception{
         System.out.println("create");
@@ -43,6 +43,7 @@ public class PostController {
         postCreateRequestDto.setViewCount(0L);
 
         Post post = this.postService.addPostList(postCreateRequestDto, categoryId, user.getEmail());
+
         return ResponseEntity.ok(new PostDto(post));
     }
 
