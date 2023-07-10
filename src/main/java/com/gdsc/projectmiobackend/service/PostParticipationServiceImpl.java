@@ -23,7 +23,7 @@ public class PostParticipationServiceImpl implements PostParticipationService {
     private final ParticipantsRepository participantsRepository;
 
     @Override
-    public String participateInPost(Long postId, String email) {
+    public String participateInPost(Long postId, String email, String content) {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
         Post post = postRepository.findById(postId)
@@ -37,7 +37,7 @@ public class PostParticipationServiceImpl implements PostParticipationService {
             }
         }
 
-        Participants participants = new Participants(post, user);
+        Participants participants = new Participants(post, user, content);
 
         participants.setApprovalOrReject(ApprovalOrReject.WAITING);
         participants.setVerifyFinish(false);
@@ -47,23 +47,20 @@ public class PostParticipationServiceImpl implements PostParticipationService {
     }
 
     @Override
-    public List<UserEntity> getParticipantsByPostId(Long postId) {
+    public List<Participants> getParticipantsByPostId(Long postId) {
         List<Participants> participants = participantsRepository.findByPostId(postId);
-        List<UserEntity> users = new ArrayList<>();
-        for (Participants participant : participants) {
-            users.add(participant.getUser());
-        }
-        return users;
+
+        return participants;
     }
 
     @Override
     public void cancelParticipateInPost(Long postId, String email) {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Post ID: " + postId));
 
-        participantsRepository.delete(new Participants(post, user));
+        Participants participants = participantsRepository.findByPostIdAndUserId(postId, user.getId());
+
+        participantsRepository.delete(participants);
     }
 
     @Override
