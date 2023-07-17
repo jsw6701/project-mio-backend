@@ -5,7 +5,6 @@ import com.gdsc.projectmiobackend.entity.Comment;
 import com.gdsc.projectmiobackend.entity.Post;
 import com.gdsc.projectmiobackend.entity.UserEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,13 +25,6 @@ public class CommentRequestDto {
 
     @Schema(description = "댓글 작성일.")
     private LocalDateTime createDate;
-
-    @Schema(description = "댓글 작성한 게시판 ID.")
-    private Long postId;
-
-    @Nullable
-    @Schema(description = "부모 댓글 ID", nullable = true, example = "null")
-    private Long parentId;
 
     public Comment toEntity(Post post, UserEntity user){
         return Comment.builder()

@@ -26,9 +26,6 @@ public class CommentFirstCreateRequestDto {
     @Schema(description = "댓글 작성일.")
     private LocalDateTime createDate;
 
-    @Schema(description = "댓글 작성한 게시판 ID.")
-    private Long postId;
-
     public Comment toEntity(Post post, UserEntity user){
         return Comment.builder()
                 .content(content)
