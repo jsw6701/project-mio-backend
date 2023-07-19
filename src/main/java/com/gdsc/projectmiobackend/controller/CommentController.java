@@ -26,7 +26,7 @@ public class CommentController {
     private final CommentService commentService;
 
     @Operation(summary = "부모 댓글 생성")
-    @PostMapping("/{postId}")
+    @PostMapping("parent/{postId}")
     public ResponseEntity<CommentDto> createComment(@RequestBody CommentFirstCreateRequestDto commentRequestDto, @PathVariable Long postId, @AuthenticationPrincipal UserInfo user){
 
         Comment comment;
@@ -37,7 +37,7 @@ public class CommentController {
     }
 
     @Operation(summary = "자식 댓글 생성")
-    @PostMapping("/{parentId}")
+    @PostMapping("child/{parentId}")
     public ResponseEntity<CommentDto> createReComment(@RequestBody CommentRequestDto commentRequestDto, @PathVariable Long parentId, @AuthenticationPrincipal UserInfo user){
 
         Comment comment;

@@ -1,7 +1,9 @@
 package com.gdsc.projectmiobackend.controller;
 
+import com.gdsc.projectmiobackend.dto.ParticipateDto;
 import com.gdsc.projectmiobackend.dto.PostDto;
-import com.gdsc.projectmiobackend.entity.UserEntity;
+import com.gdsc.projectmiobackend.dto.request.ParticipateCreateRequestDto;
+import com.gdsc.projectmiobackend.entity.Participants;
 import com.gdsc.projectmiobackend.jwt.dto.UserInfo;
 import com.gdsc.projectmiobackend.service.PostParticipationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @RestController
@@ -23,16 +26,20 @@ public class ParticipantsController {
     private final PostParticipationService participantsService;
     @Operation(summary = "유저 게시글 참여")
     @PostMapping("/{postId}/participate")
-    public ResponseEntity<String> participateInPost(@PathVariable Long postId, @AuthenticationPrincipal UserInfo user) {
+    public ResponseEntity<String> participateInPost(@PathVariable Long postId,
+                                                    @RequestBody ParticipateCreateRequestDto participateCreateRequestDto,
+                                                    @AuthenticationPrincipal UserInfo user) {
 
-        return ResponseEntity.ok(participantsService.participateInPost(postId, user.getEmail()));
+        return ResponseEntity.ok(participantsService.participateInPost(postId, user.getEmail(), participateCreateRequestDto.getContent()));
     }
 
     @Operation(summary = "게시글 별 참여자 조회")
     @GetMapping("/{postId}/participants")
-    public ResponseEntity<List<UserEntity>> getParticipantsByPostId(@PathVariable Long postId) {
-        List<UserEntity> participants = participantsService.getParticipantsByPostId(postId);
-        return new ResponseEntity<>(participants, HttpStatus.OK);
+    public ResponseEntity<List<ParticipateDto>> getParticipantsByPostId(@PathVariable Long postId) {
+
+        List<Participants> participants = participantsService.getParticipantsByPostId(postId);
+
+        return ResponseEntity.ok(participants.stream().map(ParticipateDto::new).collect(Collectors.toList()));
     }
 
     @Operation(summary = "유저 게시글 참여 취소")

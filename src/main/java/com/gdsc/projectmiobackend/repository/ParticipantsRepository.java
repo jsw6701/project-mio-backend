@@ -10,4 +10,6 @@ public interface ParticipantsRepository extends JpaRepository<Participants, Long
     List<Participants> findPostListByUserId(Long userId);
 
     List<Participants> findByUserId(Long userId);
+
+    Participants findByPostIdAndUserId(Long postId, Long userId);
 }

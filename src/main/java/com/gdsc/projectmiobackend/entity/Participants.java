@@ -31,8 +31,12 @@ public class Participants {
     @Nullable
     private Boolean verifyFinish;
 
-    public Participants(Post post, UserEntity user) {
+    @Nullable
+    private String content;
+
+    public Participants(Post post, UserEntity user, String content) {
         this.post = post;
         this.user = user;
+        this.content = content;
     }
 }
