@@ -46,7 +46,9 @@ public class ParticipantsController {
 
         List<Participants> participants = participantsService.getParticipantsByPostId(postId);
 
-        return ResponseEntity.ok(participants.stream().map(ParticipateDto::new).collect(Collectors.toList()));
+        return ResponseEntity.ok(participants.stream()
+                .map(participant -> new ParticipateDto(participant.getPost().getId(), participant.getUser().getId(), participant.getContent()))
+                .collect(Collectors.toList()));
     }
 
     @Operation(summary = "유저 게시글 참여 취소")
