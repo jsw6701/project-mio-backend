@@ -7,6 +7,8 @@ import java.util.List;
 public interface PostParticipationService {
     String participateInPost(Long postId, String email, String content);
 
+    String checkParticipate(Long postId, String email);
+
     List<Participants> getParticipantsByPostId(Long postId);
 
     void cancelParticipateInPost(Long postId, String email);
