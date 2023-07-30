@@ -29,14 +29,6 @@ public class PostParticipationServiceImpl implements PostParticipationService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Post ID: " + postId));
 
-        List<Participants> participants1 = participantsRepository.findByUserId(user.getId());
-
-        for (Participants p : participants1) {
-            if(p.getApprovalOrReject() == ApprovalOrReject.APPROVAL) {
-                return "다른 카풀에 이미 승인되었습니다.";
-            }
-        }
-
         Participants participants = new Participants(post, user, content);
 
         participants.setApprovalOrReject(ApprovalOrReject.WAITING);
@@ -44,6 +36,24 @@ public class PostParticipationServiceImpl implements PostParticipationService {
         participantsRepository.save(participants);
 
         return "카풀 예약이 완료되었습니다.";
+    }
+
+    @Override
+    public String checkParticipate(Long postId, String email){
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Post ID: " + postId));
+        List<Participants> participants1 = participantsRepository.findByUserId(user.getId());
+
+        for (Participants p : participants1) {
+            if(p.getApprovalOrReject() == ApprovalOrReject.APPROVAL && p.getPost().getTargetDate() == post.getTargetDate()
+                    && p.getPost().getVerifyGoReturn() == post.getVerifyGoReturn()) {
+                return "신청하시려는 게시글과 같은 날짜에 이미 승인된 카풀이 있습니다! 계속하시겠습니까?";
+            }
+        }
+
+        return "신청하시려는 게시글과 같은 날짜에 승인된 카풀이 없습니다. 계속하시겠습니까?";
     }
 
     @Override
@@ -96,6 +106,7 @@ public class PostParticipationServiceImpl implements PostParticipationService {
         post.setParticipantsCount(post.getParticipantsCount() + 1);
         UserEntity user = participants.getUser();
 
+/*
         List<Participants> participants1 = participantsRepository.findByUserId(user.getId());
 
         for (Participants p : participants1) {
@@ -103,7 +114,8 @@ public class PostParticipationServiceImpl implements PostParticipationService {
                 if(!p.getVerifyFinish())
                     participantsRepository.delete(p);
             }
-        }
+        }*/
+
 
         participantsRepository.save(participants);
     }

@@ -9,4 +9,6 @@ import lombok.*;
 @AllArgsConstructor
 public class MannerUpdateRequestDto {
     private String manner;
+
+    private String content;
 }

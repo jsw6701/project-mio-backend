@@ -7,20 +7,15 @@ import com.gdsc.projectmiobackend.dto.request.MannerUpdateRequestDto;
 import com.gdsc.projectmiobackend.dto.request.PostCreateRequestDto;
 import com.gdsc.projectmiobackend.dto.request.PostPatchRequestDto;
 import com.gdsc.projectmiobackend.dto.request.PostVerifyFinishRequestDto;
-import com.gdsc.projectmiobackend.entity.Category;
-import com.gdsc.projectmiobackend.entity.Participants;
-import com.gdsc.projectmiobackend.entity.Post;
-import com.gdsc.projectmiobackend.entity.UserEntity;
-import com.gdsc.projectmiobackend.repository.CategoryRepository;
-import com.gdsc.projectmiobackend.repository.ParticipantsRepository;
-import com.gdsc.projectmiobackend.repository.PostRepository;
-import com.gdsc.projectmiobackend.repository.UserRepository;
+import com.gdsc.projectmiobackend.entity.*;
+import com.gdsc.projectmiobackend.repository.*;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,6 +30,8 @@ public class PostServiceImpl implements PostService{
     private final UserRepository userRepository;
 
     private final ParticipantsRepository participantsRepository;
+
+    private final MannerEntityRepository mannerEntityRepository;
 
     @Override
     public Post findById(Long id) {
@@ -188,6 +185,9 @@ public class PostServiceImpl implements PostService{
         Long updateMannerCount = driver.getMannerCount();
 
         driver.setGrade(calculateGrade(updateMannerCount));
+
+        MannerEntity mannerEntity = new MannerEntity(mannerUpdateRequestDto.getManner(), mannerUpdateRequestDto.getContent(), driver.getId(), LocalDateTime.now());
+        mannerEntityRepository.save(mannerEntity);
         this.userRepository.save(driver);
     }
 
@@ -216,6 +216,10 @@ public class PostServiceImpl implements PostService{
         }
 
         targetUser.setGrade(calculateGrade(targetUser.getMannerCount()));
+
+        MannerEntity mannerEntity = new MannerEntity(mannerUpdateRequestDto.getManner(), mannerUpdateRequestDto.getContent(), targetUser.getId(), LocalDateTime.now());
+        mannerEntityRepository.save(mannerEntity);
+        this.userRepository.save(targetUser);
     }
 
     private String calculateGrade(Long mannerCount) {
