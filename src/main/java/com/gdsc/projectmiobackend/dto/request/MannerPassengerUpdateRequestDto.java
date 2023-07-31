@@ -7,8 +7,11 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MannerUpdateRequestDto {
+public class MannerPassengerUpdateRequestDto {
     private String manner;
 
     private String content;
+
+    private Long postId;
 }
+

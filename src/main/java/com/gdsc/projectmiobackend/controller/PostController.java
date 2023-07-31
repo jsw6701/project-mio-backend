@@ -2,10 +2,7 @@ package com.gdsc.projectmiobackend.controller;
 
 
 import com.gdsc.projectmiobackend.dto.PostDto;
-import com.gdsc.projectmiobackend.dto.request.MannerUpdateRequestDto;
-import com.gdsc.projectmiobackend.dto.request.PostCreateRequestDto;
-import com.gdsc.projectmiobackend.dto.request.PostPatchRequestDto;
-import com.gdsc.projectmiobackend.dto.request.PostVerifyFinishRequestDto;
+import com.gdsc.projectmiobackend.dto.request.*;
 import com.gdsc.projectmiobackend.entity.Post;
 import com.gdsc.projectmiobackend.jwt.dto.UserInfo;
 import com.gdsc.projectmiobackend.service.PostService;
@@ -224,8 +221,8 @@ public class PostController {
     @PostMapping("/post/{postId}/evaluation/driver")
     public ResponseEntity<?> updateDriverMannerScore(@PathVariable Long postId,
                                                      @AuthenticationPrincipal UserInfo user,
-                                                     @RequestBody MannerUpdateRequestDto mannerUpdateRequestDto) {
-        postService.driverUpdateManner(postId, user.getEmail(), mannerUpdateRequestDto);
+                                                     @RequestBody MannerDriverUpdateRequestDto mannerDriverUpdateRequestDto) {
+        postService.driverUpdateManner(postId, user.getEmail(), mannerDriverUpdateRequestDto);
         return ResponseEntity.ok().build();
     }
 
@@ -233,8 +230,8 @@ public class PostController {
     @PostMapping("/post/{userId}/evaluation/passenger")
     public ResponseEntity<?> updatePassengersMannerScore(@PathVariable Long userId,
                                                          @AuthenticationPrincipal UserInfo user,
-                                                         @RequestBody MannerUpdateRequestDto mannerUpdateRequestDto) {
-        postService.updateParticipatesManner(userId, mannerUpdateRequestDto, user.getEmail());
+                                                         @RequestBody MannerPassengerUpdateRequestDto mannerPassengerUpdateRequestDto) {
+        postService.updateParticipatesManner(userId, mannerPassengerUpdateRequestDto, user.getEmail());
         return ResponseEntity.ok().build();
     }
 
