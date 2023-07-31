@@ -33,6 +33,8 @@ public class PostParticipationServiceImpl implements PostParticipationService {
 
         participants.setApprovalOrReject(ApprovalOrReject.WAITING);
         participants.setVerifyFinish(false);
+        participants.setDriverMannerFinish(false);
+        participants.setPassengerMannerFinish(false);
         participantsRepository.save(participants);
 
         return "카풀 예약이 완료되었습니다.";
