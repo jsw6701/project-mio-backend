@@ -33,6 +33,12 @@ public class Participants {
     private Boolean verifyFinish;
 
     @Nullable
+    private Boolean driverMannerFinish;
+
+    @Nullable
+    private Boolean passengerMannerFinish;
+
+    @Nullable
     private String content;
 
     public Participants(Post post, UserEntity user, String content) {
