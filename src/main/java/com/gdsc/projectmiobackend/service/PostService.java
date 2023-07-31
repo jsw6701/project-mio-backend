@@ -2,10 +2,7 @@ package com.gdsc.projectmiobackend.service;
 
 
 import com.gdsc.projectmiobackend.dto.PostDto;
-import com.gdsc.projectmiobackend.dto.request.MannerUpdateRequestDto;
-import com.gdsc.projectmiobackend.dto.request.PostCreateRequestDto;
-import com.gdsc.projectmiobackend.dto.request.PostPatchRequestDto;
-import com.gdsc.projectmiobackend.dto.request.PostVerifyFinishRequestDto;
+import com.gdsc.projectmiobackend.dto.request.*;
 import com.gdsc.projectmiobackend.entity.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,9 +34,9 @@ public interface PostService {
 
     String getApprovalUserCountByPost(Long postId);
 
-    void driverUpdateManner(Long id, String email, MannerUpdateRequestDto mannerUpdateRequestDto);
+    void driverUpdateManner(Long id, String email, MannerDriverUpdateRequestDto mannerDriverUpdateRequestDto);
 
-    void updateParticipatesManner(Long userId, MannerUpdateRequestDto mannerUpdateRequestDto, String email);
+    void updateParticipatesManner(Long userId, MannerPassengerUpdateRequestDto mannerPassengerUpdateRequestDto, String email);
 
     Page<PostDto> findByParticipate(String email, Pageable pageable);
 }
