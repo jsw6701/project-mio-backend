@@ -3,24 +3,16 @@ package com.gdsc.projectmiobackend.service;
 
 import com.gdsc.projectmiobackend.common.ApprovalOrReject;
 import com.gdsc.projectmiobackend.dto.PostDto;
-import com.gdsc.projectmiobackend.dto.request.MannerUpdateRequestDto;
-import com.gdsc.projectmiobackend.dto.request.PostCreateRequestDto;
-import com.gdsc.projectmiobackend.dto.request.PostPatchRequestDto;
-import com.gdsc.projectmiobackend.dto.request.PostVerifyFinishRequestDto;
-import com.gdsc.projectmiobackend.entity.Category;
-import com.gdsc.projectmiobackend.entity.Participants;
-import com.gdsc.projectmiobackend.entity.Post;
-import com.gdsc.projectmiobackend.entity.UserEntity;
-import com.gdsc.projectmiobackend.repository.CategoryRepository;
-import com.gdsc.projectmiobackend.repository.ParticipantsRepository;
-import com.gdsc.projectmiobackend.repository.PostRepository;
-import com.gdsc.projectmiobackend.repository.UserRepository;
+import com.gdsc.projectmiobackend.dto.request.*;
+import com.gdsc.projectmiobackend.entity.*;
+import com.gdsc.projectmiobackend.repository.*;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,6 +27,8 @@ public class PostServiceImpl implements PostService{
     private final UserRepository userRepository;
 
     private final ParticipantsRepository participantsRepository;
+
+    private final MannerEntityRepository mannerEntityRepository;
 
     @Override
     public Post findById(Long id) {
@@ -147,9 +141,10 @@ public class PostServiceImpl implements PostService{
     }
 
     @Override
-    public void driverUpdateManner(Long id, String email, MannerUpdateRequestDto mannerUpdateRequestDto){
+    public void driverUpdateManner(Long id, String email, MannerDriverUpdateRequestDto mannerDriverUpdateRequestDto){
         UserEntity currentUser = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
         Post post = this.findById(id);
+
 
         if(currentUser.getMannerCount() == null){
             currentUser.setMannerCount(0L);
@@ -171,30 +166,62 @@ public class PostServiceImpl implements PostService{
 
         if (!Objects.equals(post.getUser().getEmail(), currentUser.getEmail())) {
             if(participants.stream().anyMatch(participant -> Objects.equals(participant.getUser().getEmail(), currentUser.getEmail()))){
-                if(mannerUpdateRequestDto.getManner().equals("good")) {
+
+                Participants participants1 = participants.stream().filter(participant -> Objects.equals(participant.getUser().getEmail(), currentUser.getEmail())).findFirst().orElseThrow(() -> new IllegalArgumentException("참여자가 아닙니다."));
+
+                if(participants1.getDriverMannerFinish()){
+                    throw new IllegalStateException("이미 평가한 운전자입니다.");
+                }
+
+                participants1.setDriverMannerFinish(true);
+                participantsRepository.save(participants1);
+
+                if(mannerDriverUpdateRequestDto.getManner().equals("good")) {
                     driver.setMannerCount(driverMannerCount + 1);
-                } else if(mannerUpdateRequestDto.getManner().equals("bad")) {
+                } else if(mannerDriverUpdateRequestDto.getManner().equals("bad")) {
                     driver.setMannerCount(driverMannerCount - 1);
-                } else if(mannerUpdateRequestDto.getManner().equals("normal")) {
+                } else if(mannerDriverUpdateRequestDto.getManner().equals("normal")) {
                     driver.setMannerCount(driverMannerCount);
                 } else {
                     throw new IllegalStateException("잘못된 평가입니다.");
                 }
+
+
             }
             else{
                 throw new IllegalStateException("해당 글에 참여하지 않았습니다.");
             }
         }
+
+        else{
+            throw new IllegalStateException("해당 글의 운전자입니다.");
+        }
         Long updateMannerCount = driver.getMannerCount();
 
         driver.setGrade(calculateGrade(updateMannerCount));
+
+
+
+        MannerEntity mannerEntity = new MannerEntity(mannerDriverUpdateRequestDto.getManner(), mannerDriverUpdateRequestDto.getContent(), driver.getId(), LocalDateTime.now());
+
+        mannerEntityRepository.save(mannerEntity);
         this.userRepository.save(driver);
     }
 
     @Override
-    public void updateParticipatesManner(Long userId, MannerUpdateRequestDto mannerUpdateRequestDto, String email){
+    public void updateParticipatesManner(Long userId, MannerPassengerUpdateRequestDto mannerPassengerUpdateRequestDto, String email){
         UserEntity targetUser = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
         UserEntity currentUser = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
+
+        Participants participants = participantsRepository.findByPostIdAndUserId(mannerPassengerUpdateRequestDto.getPostId(), userId);
+
+        if (Objects.equals(targetUser.getEmail(), currentUser.getEmail())) {
+            throw new IllegalStateException("자기 자신을 평가할 수 없습니다.");
+        }
+
+        if(participants.getPassengerMannerFinish()){
+            throw new IllegalStateException("이미 평가한 유저입니다.");
+        }
 
         if(currentUser.getMannerCount() == null){
             currentUser.setMannerCount(0L);
@@ -205,17 +232,23 @@ public class PostServiceImpl implements PostService{
 
         Long targetUserMannerCount = targetUser.getMannerCount();
 
-        if(mannerUpdateRequestDto.getManner().equals("good")) {
+        if(mannerPassengerUpdateRequestDto.getManner().equals("good")) {
             targetUser.setMannerCount(targetUserMannerCount + 1);
-        } else if(mannerUpdateRequestDto.getManner().equals("bad")) {
+        } else if(mannerPassengerUpdateRequestDto.getManner().equals("bad")) {
             targetUser.setMannerCount(targetUserMannerCount - 1);
-        } else if(mannerUpdateRequestDto.getManner().equals("normal")) {
+        } else if(mannerPassengerUpdateRequestDto.getManner().equals("normal")) {
             targetUser.setMannerCount(targetUserMannerCount);
         } else {
             throw new IllegalStateException("잘못된 평가입니다.");
         }
 
+        participants.setPassengerMannerFinish(true);
+        participantsRepository.save(participants);
         targetUser.setGrade(calculateGrade(targetUser.getMannerCount()));
+
+        MannerEntity mannerEntity = new MannerEntity(mannerPassengerUpdateRequestDto.getManner(), mannerPassengerUpdateRequestDto.getContent(), targetUser.getId(), LocalDateTime.now());
+        mannerEntityRepository.save(mannerEntity);
+        this.userRepository.save(targetUser);
     }
 
     private String calculateGrade(Long mannerCount) {

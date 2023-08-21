@@ -33,13 +33,22 @@ public class ParticipantsController {
         return ResponseEntity.ok(participantsService.participateInPost(postId, user.getEmail(), participateCreateRequestDto.getContent()));
     }
 
+    @Operation(summary = "같은 날 신청하려는 게시글과 같은 등/하교 승인된 게시글이 있는지 확인")
+    @GetMapping("/{postId}/check")
+    public ResponseEntity<String> checkParticipate(@PathVariable Long postId, @AuthenticationPrincipal UserInfo user) {
+
+        return ResponseEntity.ok(participantsService.checkParticipate(postId, user.getEmail()));
+    }
+
     @Operation(summary = "게시글 별 참여자 조회")
     @GetMapping("/{postId}/participants")
     public ResponseEntity<List<ParticipateDto>> getParticipantsByPostId(@PathVariable Long postId) {
 
         List<Participants> participants = participantsService.getParticipantsByPostId(postId);
 
-        return ResponseEntity.ok(participants.stream().map(ParticipateDto::new).collect(Collectors.toList()));
+        return ResponseEntity.ok(participants.stream()
+                .map(participant -> new ParticipateDto(participant.getPost().getId(), participant.getUser().getId(), participant.getContent()))
+                .collect(Collectors.toList()));
     }
 
     @Operation(summary = "유저 게시글 참여 취소")

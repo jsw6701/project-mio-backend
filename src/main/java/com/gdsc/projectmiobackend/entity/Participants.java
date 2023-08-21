@@ -1,6 +1,7 @@
 package com.gdsc.projectmiobackend.entity;
 
 import com.gdsc.projectmiobackend.common.ApprovalOrReject;
+import com.gdsc.projectmiobackend.dto.ParticipateDto;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -16,11 +17,11 @@ public class Participants {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "post_id")
     private Post post;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
@@ -32,11 +33,25 @@ public class Participants {
     private Boolean verifyFinish;
 
     @Nullable
+    private Boolean driverMannerFinish;
+
+    @Nullable
+    private Boolean passengerMannerFinish;
+
+    @Nullable
     private String content;
 
     public Participants(Post post, UserEntity user, String content) {
         this.post = post;
         this.user = user;
         this.content = content;
+    }
+
+    public ParticipateDto toDto() {
+        return ParticipateDto.builder()
+                .postId(post.getId())
+                .userId(user.getId())
+                .content(content)
+                .build();
     }
 }
