@@ -6,5 +6,7 @@ import com.gdsc.projectmiobackend.entity.Alarm;
 public interface AlarmService {
     Alarm saveAlarm(AlarmCreateRequestDto alarm);
 
+    Alarm getAllAlarm(String email);
+
     void deleteAlarm(Long id, String email);
 }
