@@ -25,4 +25,11 @@ public class Alarm {
 
     @ManyToOne
     private UserEntity userEntity;
+
+    public Alarm(LocalDateTime createDate, String content, Post post, UserEntity userEntity) {
+        this.createDate = createDate;
+        this.content = content;
+        this.post = post;
+        this.userEntity = userEntity;
+    }
 }

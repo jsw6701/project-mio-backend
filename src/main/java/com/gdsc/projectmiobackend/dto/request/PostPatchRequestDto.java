@@ -17,6 +17,10 @@ import java.time.LocalTime;
 @AllArgsConstructor
 public class PostPatchRequestDto {
 
+    @Schema(description = "제목입니다.", example = "제목")
+    @NotEmpty(message="제목은 필수 항목입니다.")
+    private String title;
+
     @Schema(description = "내용입니다.", example = "내용")
     @NotEmpty(message="내용은 필수 항목입니다.")
     private String content;
