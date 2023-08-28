@@ -210,6 +210,16 @@ public class PostController {
         return ResponseEntity.ok(postList);
     }
 
+    @Operation(summary = "위치로 게시글 리스트 조회")
+    @GetMapping("post/location2")
+    public ResponseEntity<List<PostDto>> readPostByLocation(@RequestParam("location") String location){
+        System.out.println("read all");
+
+        List<PostDto> postList = this.postService.findByLocation(location);
+
+        return ResponseEntity.ok(postList);
+    }
+
     @Operation(summary = "게시글 현재 참여 인원")
     @GetMapping("/{postId}/participants/count")
     public ResponseEntity<String> getApprovalUserCountByPost(@PathVariable Long postId) {
