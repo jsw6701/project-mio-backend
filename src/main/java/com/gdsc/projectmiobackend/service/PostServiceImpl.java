@@ -284,4 +284,10 @@ public class PostServiceImpl implements PostService{
         Page<PostDto> page = new PageImpl<>(participants.stream().map(Participants::getPost).map(Post::toDto).toList(), pageable, participants.size());
         return page;
     }
+
+    @Override
+    public List<PostDto> findByLocation(String location){
+        List<Post> postList = postRepository.findByLocation(location);
+        return postList.stream().map(Post::toDto).toList();
+    }
 }

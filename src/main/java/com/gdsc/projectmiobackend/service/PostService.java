@@ -39,4 +39,6 @@ public interface PostService {
     void updateParticipatesManner(Long userId, MannerPassengerUpdateRequestDto mannerPassengerUpdateRequestDto, String email);
 
     Page<PostDto> findByParticipate(String email, Pageable pageable);
+
+    List<PostDto> findByLocation(String location);
 }
