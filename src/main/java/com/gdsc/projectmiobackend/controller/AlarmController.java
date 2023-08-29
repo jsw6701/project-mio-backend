@@ -1,11 +1,8 @@
 package com.gdsc.projectmiobackend.controller;
 
 import com.gdsc.projectmiobackend.dto.AlarmDto;
-import com.gdsc.projectmiobackend.dto.PostDto;
 import com.gdsc.projectmiobackend.dto.request.AlarmCreateRequestDto;
-import com.gdsc.projectmiobackend.dto.request.PostCreateRequestDto;
 import com.gdsc.projectmiobackend.entity.Alarm;
-import com.gdsc.projectmiobackend.entity.Post;
 import com.gdsc.projectmiobackend.jwt.dto.UserInfo;
 import com.gdsc.projectmiobackend.service.AlarmService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,12 +24,19 @@ public class AlarmController {
     @Operation(summary = "알람 생성")
     @PostMapping("/create")
     public ResponseEntity<AlarmDto> create(
-            @ModelAttribute AlarmCreateRequestDto alarmCreateRequestDto) throws Exception{
-        System.out.println("create");
+            @RequestBody AlarmCreateRequestDto alarmCreateRequestDto){
 
         Alarm alarm = this.alarmService.saveAlarm(alarmCreateRequestDto);
 
         return ResponseEntity.ok(new AlarmDto(alarm));
+    }
+
+    @Operation(summary = "알람 조회")
+    @GetMapping("/readAll")
+    public ResponseEntity<?> readAll(
+            @AuthenticationPrincipal UserInfo user){
+
+        return ResponseEntity.ok(this.alarmService.getAllAlarm(user.getEmail()));
     }
 
     @Operation(summary = "알람 삭제")
@@ -40,7 +44,6 @@ public class AlarmController {
     public ResponseEntity<?> delete(
             @PathVariable Long id,
             @AuthenticationPrincipal UserInfo user){
-        System.out.println("delete");
 
         this.alarmService.deleteAlarm(id, user.getEmail());
         return ResponseEntity.ok().build();

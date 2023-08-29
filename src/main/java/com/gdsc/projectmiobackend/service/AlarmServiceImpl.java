@@ -28,6 +28,12 @@ public class AlarmServiceImpl implements AlarmService{
     }
 
     @Override
+    public Alarm getAllAlarm(String email){
+        UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
+        return alarmRepository.findByUserEntity(user);
+    }
+
+    @Override
     public void deleteAlarm(Long id, String email){
         UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
 

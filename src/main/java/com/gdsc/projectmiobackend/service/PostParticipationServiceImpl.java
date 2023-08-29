@@ -2,17 +2,22 @@ package com.gdsc.projectmiobackend.service;
 
 import com.gdsc.projectmiobackend.common.ApprovalOrReject;
 import com.gdsc.projectmiobackend.dto.PostDto;
+import com.gdsc.projectmiobackend.entity.Alarm;
 import com.gdsc.projectmiobackend.entity.Participants;
 import com.gdsc.projectmiobackend.entity.Post;
 import com.gdsc.projectmiobackend.entity.UserEntity;
+import com.gdsc.projectmiobackend.repository.AlarmRepository;
 import com.gdsc.projectmiobackend.repository.ParticipantsRepository;
 import com.gdsc.projectmiobackend.repository.PostRepository;
 import com.gdsc.projectmiobackend.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,6 +26,7 @@ public class PostParticipationServiceImpl implements PostParticipationService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final ParticipantsRepository participantsRepository;
+    private final AlarmRepository alarmRepository;
 
     @Override
     public String participateInPost(Long postId, String email, String content) {
@@ -28,6 +34,14 @@ public class PostParticipationServiceImpl implements PostParticipationService {
                 .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Post ID: " + postId));
+
+        if(participantsRepository.findByPostIdAndUserId(postId, user.getId()) != null){
+            throw new IllegalArgumentException("이미 신청한 게시글입니다.");
+        }
+
+        if(Objects.equals(user.getEmail(), post.getUser().getEmail())){
+            throw new IllegalArgumentException("자신의 게시글에는 신청할 수 없습니다.");
+        }
 
         Participants participants = new Participants(post, user, content);
 
@@ -41,7 +55,7 @@ public class PostParticipationServiceImpl implements PostParticipationService {
     }
 
     @Override
-    public String checkParticipate(Long postId, String email){
+    public Boolean checkParticipate(Long postId, String email){
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
         Post post = postRepository.findById(postId)
@@ -51,11 +65,11 @@ public class PostParticipationServiceImpl implements PostParticipationService {
         for (Participants p : participants1) {
             if(p.getApprovalOrReject() == ApprovalOrReject.APPROVAL && p.getPost().getTargetDate() == post.getTargetDate()
                     && p.getPost().getVerifyGoReturn() == post.getVerifyGoReturn()) {
-                return "신청하시려는 게시글과 같은 날짜에 이미 승인된 카풀이 있습니다! 계속하시겠습니까?";
+                return false;
             }
         }
 
-        return "신청하시려는 게시글과 같은 날짜에 승인된 카풀이 없습니다. 계속하시겠습니까?";
+        return true;
     }
 
     @Override
@@ -70,8 +84,18 @@ public class PostParticipationServiceImpl implements PostParticipationService {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
 
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Post ID: " + postId));
+
+        if(Objects.equals(post.getTargetDate(), LocalDate.now())){
+            throw new IllegalArgumentException("당일 카풀은 취소할 수 없습니다.");
+        }
+
         Participants participants = participantsRepository.findByPostIdAndUserId(postId, user.getId());
 
+        Alarm alarm = new Alarm(LocalDateTime.now(), "신청을 취소한 사람이 있습니다!", post, participants.getUser());
+
+        alarmRepository.save(alarm);
         participantsRepository.delete(participants);
     }
 
@@ -106,7 +130,7 @@ public class PostParticipationServiceImpl implements PostParticipationService {
 
         participants.setApprovalOrReject(ApprovalOrReject.APPROVAL);
         post.setParticipantsCount(post.getParticipantsCount() + 1);
-        UserEntity user = participants.getUser();
+        //UserEntity user = participants.getUser();
 
 /*
         List<Participants> participants1 = participantsRepository.findByUserId(user.getId());
