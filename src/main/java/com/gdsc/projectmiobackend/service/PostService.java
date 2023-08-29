@@ -1,6 +1,7 @@
 package com.gdsc.projectmiobackend.service;
 
 
+import com.gdsc.projectmiobackend.dto.ParticipateGetDto;
 import com.gdsc.projectmiobackend.dto.PostDto;
 import com.gdsc.projectmiobackend.dto.request.*;
 import com.gdsc.projectmiobackend.entity.Post;
@@ -32,7 +33,7 @@ public interface PostService {
 
     List<PostDto> findByLatitudeAndLongitude(Double latitude, Double longitude);
 
-    String getApprovalUserCountByPost(Long postId);
+    ParticipateGetDto getApprovalUserCountByPost(Long postId);
 
     void driverUpdateManner(Long id, String email, MannerDriverUpdateRequestDto mannerDriverUpdateRequestDto);
 

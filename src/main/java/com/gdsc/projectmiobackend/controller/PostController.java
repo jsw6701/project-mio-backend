@@ -1,6 +1,7 @@
 package com.gdsc.projectmiobackend.controller;
 
 
+import com.gdsc.projectmiobackend.dto.ParticipateGetDto;
 import com.gdsc.projectmiobackend.dto.PostDto;
 import com.gdsc.projectmiobackend.dto.request.*;
 import com.gdsc.projectmiobackend.entity.Post;
@@ -222,9 +223,9 @@ public class PostController {
 
     @Operation(summary = "게시글 현재 참여 인원")
     @GetMapping("/{postId}/participants/count")
-    public ResponseEntity<String> getApprovalUserCountByPost(@PathVariable Long postId) {
-        String result = postService.getApprovalUserCountByPost(postId);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<ParticipateGetDto> getApprovalUserCountByPost(@PathVariable Long postId) {
+        ParticipateGetDto participateGetDto = postService.getApprovalUserCountByPost(postId);
+        return ResponseEntity.ok(participateGetDto);
     }
 
     @Operation(summary = "기사 매너 평가")
