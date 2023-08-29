@@ -39,6 +39,10 @@ public class PostParticipationServiceImpl implements PostParticipationService {
             throw new IllegalArgumentException("이미 신청한 게시글입니다.");
         }
 
+        if(Objects.equals(user.getEmail(), post.getUser().getEmail())){
+            throw new IllegalArgumentException("자신의 게시글에는 신청할 수 없습니다.");
+        }
+
         Participants participants = new Participants(post, user, content);
 
         participants.setApprovalOrReject(ApprovalOrReject.WAITING);
@@ -51,7 +55,7 @@ public class PostParticipationServiceImpl implements PostParticipationService {
     }
 
     @Override
-    public String checkParticipate(Long postId, String email){
+    public Boolean checkParticipate(Long postId, String email){
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
         Post post = postRepository.findById(postId)
@@ -61,11 +65,11 @@ public class PostParticipationServiceImpl implements PostParticipationService {
         for (Participants p : participants1) {
             if(p.getApprovalOrReject() == ApprovalOrReject.APPROVAL && p.getPost().getTargetDate() == post.getTargetDate()
                     && p.getPost().getVerifyGoReturn() == post.getVerifyGoReturn()) {
-                return "신청하시려는 게시글과 같은 날짜에 이미 승인된 카풀이 있습니다! 계속하시겠습니까?";
+                return false;
             }
         }
 
-        return "신청하시려는 게시글과 같은 날짜에 승인된 카풀이 없습니다. 계속하시겠습니까?";
+        return true;
     }
 
     @Override

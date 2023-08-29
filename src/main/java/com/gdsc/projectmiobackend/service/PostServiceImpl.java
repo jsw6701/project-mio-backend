@@ -2,6 +2,7 @@ package com.gdsc.projectmiobackend.service;
 
 
 import com.gdsc.projectmiobackend.common.ApprovalOrReject;
+import com.gdsc.projectmiobackend.dto.ParticipateGetDto;
 import com.gdsc.projectmiobackend.dto.PostDto;
 import com.gdsc.projectmiobackend.dto.request.*;
 import com.gdsc.projectmiobackend.entity.*;
@@ -134,10 +135,9 @@ public class PostServiceImpl implements PostService{
     }
 
     @Override
-    public String getApprovalUserCountByPost(Long postId){
+    public ParticipateGetDto getApprovalUserCountByPost(Long postId){
         Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("Invalid Post ID: " + postId));
-        String result = post.getParticipantsCount() + "/" + post.getNumberOfPassengers();
-        return result;
+        return new ParticipateGetDto(post.getParticipantsCount(), post.getNumberOfPassengers());
     }
 
     @Override
@@ -176,14 +176,11 @@ public class PostServiceImpl implements PostService{
                 participants1.setDriverMannerFinish(true);
                 participantsRepository.save(participants1);
 
-                if(mannerDriverUpdateRequestDto.getManner().equals("good")) {
-                    driver.setMannerCount(driverMannerCount + 1);
-                } else if(mannerDriverUpdateRequestDto.getManner().equals("bad")) {
-                    driver.setMannerCount(driverMannerCount - 1);
-                } else if(mannerDriverUpdateRequestDto.getManner().equals("normal")) {
-                    driver.setMannerCount(driverMannerCount);
-                } else {
-                    throw new IllegalStateException("잘못된 평가입니다.");
+                switch (mannerDriverUpdateRequestDto.getManner()) {
+                    case "good" -> driver.setMannerCount(driverMannerCount + 1);
+                    case "bad" -> driver.setMannerCount(driverMannerCount - 1);
+                    case "normal" -> driver.setMannerCount(driverMannerCount);
+                    default -> throw new IllegalStateException("잘못된 평가입니다.");
                 }
 
 
@@ -232,14 +229,11 @@ public class PostServiceImpl implements PostService{
 
         Long targetUserMannerCount = targetUser.getMannerCount();
 
-        if(mannerPassengerUpdateRequestDto.getManner().equals("good")) {
-            targetUser.setMannerCount(targetUserMannerCount + 1);
-        } else if(mannerPassengerUpdateRequestDto.getManner().equals("bad")) {
-            targetUser.setMannerCount(targetUserMannerCount - 1);
-        } else if(mannerPassengerUpdateRequestDto.getManner().equals("normal")) {
-            targetUser.setMannerCount(targetUserMannerCount);
-        } else {
-            throw new IllegalStateException("잘못된 평가입니다.");
+        switch (mannerPassengerUpdateRequestDto.getManner()) {
+            case "good" -> targetUser.setMannerCount(targetUserMannerCount + 1);
+            case "bad" -> targetUser.setMannerCount(targetUserMannerCount - 1);
+            case "normal" -> targetUser.setMannerCount(targetUserMannerCount);
+            default -> throw new IllegalStateException("잘못된 평가입니다.");
         }
 
         participants.setPassengerMannerFinish(true);
