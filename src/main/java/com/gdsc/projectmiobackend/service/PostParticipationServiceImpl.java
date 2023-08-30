@@ -38,10 +38,10 @@ public class PostParticipationServiceImpl implements PostParticipationService {
         if(participantsRepository.findByPostIdAndUserId(postId, user.getId()) != null){
             throw new IllegalArgumentException("이미 신청한 게시글입니다.");
         }
-
+/*
         if(Objects.equals(user.getEmail(), post.getUser().getEmail())){
             throw new IllegalArgumentException("자신의 게시글에는 신청할 수 없습니다.");
-        }
+        }*/
 
         Participants participants = new Participants(post, user, content);
 
@@ -63,12 +63,14 @@ public class PostParticipationServiceImpl implements PostParticipationService {
         List<Participants> participants1 = participantsRepository.findByUserId(user.getId());
 
         for (Participants p : participants1) {
-            if(p.getApprovalOrReject() == ApprovalOrReject.APPROVAL && p.getPost().getTargetDate() == post.getTargetDate()
-                    && p.getPost().getVerifyGoReturn() == post.getVerifyGoReturn()) {
-                return false;
+            if(p.getApprovalOrReject() == ApprovalOrReject.APPROVAL){
+                if(p.getPost().getTargetDate().isEqual(post.getTargetDate())){
+                    if(p.getPost().getVerifyGoReturn() == post.getVerifyGoReturn()) {
+                        return false;
+                    }
+                }
             }
         }
-
         return true;
     }
 
