@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface BookMarkService {
 
-    String saveBookMark(Long postId , String email);
+    void saveBookMark(Long postId , String email);
 
     List<BookMark> getUserBookMarkList(String email);
 

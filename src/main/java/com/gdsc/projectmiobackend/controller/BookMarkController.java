@@ -23,9 +23,11 @@ public class BookMarkController {
 
     @Operation(summary = "북마크 추가")
     @PostMapping("{postId}")
-    public ResponseEntity<String> addBookMark(Long postId,
+    public ResponseEntity<?> addBookMark(Long postId,
                                             @AuthenticationPrincipal UserInfo user){
-        return ResponseEntity.ok(this.bookMarkService.saveBookMark(postId, user.getEmail()));
+
+        this.bookMarkService.saveBookMark(postId, user.getEmail());
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "회원별 북마크 조회")
