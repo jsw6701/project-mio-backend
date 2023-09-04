@@ -21,7 +21,6 @@ public class UserController {
     @PatchMapping("/user/{userId}")
     public ResponseEntity<UserDto> update(@PathVariable Long userId,
                                           @RequestBody AdditionalUserPatchDto additionalUserPatchDto) throws Exception {
-        System.out.println("update");
 
         UserEntity user = authService.update(userId, additionalUserPatchDto);
         return ResponseEntity.ok(new UserDto(user));
