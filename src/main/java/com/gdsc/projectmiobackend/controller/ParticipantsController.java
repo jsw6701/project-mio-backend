@@ -26,7 +26,7 @@ public class ParticipantsController {
     private final PostParticipationService participantsService;
     @Operation(summary = "유저 게시글 참여")
     @PostMapping("/{postId}/participate")
-    public ResponseEntity<String> participateInPost(@PathVariable Long postId,
+    public ResponseEntity<?> participateInPost(@PathVariable Long postId,
                                                     @RequestBody ParticipateCreateRequestDto participateCreateRequestDto,
                                                     @AuthenticationPrincipal UserInfo user) {
         participantsService.participateInPost(postId, user.getEmail(), participateCreateRequestDto.getContent());
