@@ -18,6 +18,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     List<Post> findByLatitudeAndLongitude(Double latitude, Double longitude);
 
-    List<Post> findByLocation(String location);
+    List<Post> findByLocationContaining(String location);
 
 }
