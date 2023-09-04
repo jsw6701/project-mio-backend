@@ -29,8 +29,8 @@ public class ParticipantsController {
     public ResponseEntity<String> participateInPost(@PathVariable Long postId,
                                                     @RequestBody ParticipateCreateRequestDto participateCreateRequestDto,
                                                     @AuthenticationPrincipal UserInfo user) {
-
-        return ResponseEntity.ok(participantsService.participateInPost(postId, user.getEmail(), participateCreateRequestDto.getContent()));
+        participantsService.participateInPost(postId, user.getEmail(), participateCreateRequestDto.getContent());
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "같은 날 신청하려는 게시글과 같은 등/하교 승인된 게시글이 있는지 확인")
