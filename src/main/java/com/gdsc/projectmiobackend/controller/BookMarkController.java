@@ -1,6 +1,6 @@
 package com.gdsc.projectmiobackend.controller;
 
-import com.gdsc.projectmiobackend.entity.BookMark;
+import com.gdsc.projectmiobackend.dto.BookMarkDto;
 import com.gdsc.projectmiobackend.jwt.dto.UserInfo;
 import com.gdsc.projectmiobackend.service.BookMarkService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,8 +32,8 @@ public class BookMarkController {
 
     @Operation(summary = "회원별 북마크 조회")
     @GetMapping("/user")
-    public ResponseEntity<List<BookMark>> readBookMark(@AuthenticationPrincipal UserInfo user){
-        List<BookMark> bookMarks = this.bookMarkService.getUserBookMarkList(user.getEmail());
+    public ResponseEntity<List<BookMarkDto>> readBookMark(@AuthenticationPrincipal UserInfo user){
+        List<BookMarkDto> bookMarks = this.bookMarkService.getUserBookMarkList(user.getEmail());
         return ResponseEntity.ok(bookMarks);
     }
 

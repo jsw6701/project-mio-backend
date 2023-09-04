@@ -1,5 +1,6 @@
 package com.gdsc.projectmiobackend.service;
 
+import com.gdsc.projectmiobackend.dto.BookMarkDto;
 import com.gdsc.projectmiobackend.entity.BookMark;
 import com.gdsc.projectmiobackend.entity.Post;
 import com.gdsc.projectmiobackend.entity.UserEntity;
@@ -42,8 +43,9 @@ public class BookMarkServiceImpl implements BookMarkService{
     }
 
     @Override
-    public List<BookMark> getUserBookMarkList(String email){
+    public List<BookMarkDto> getUserBookMarkList(String email){
         UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(()->new IllegalArgumentException("해당 유저가 없습니다."));
-        return bookMarkRepository.findByUserEntity(userEntity);
+        List<BookMark> bookMarks = bookMarkRepository.findByUserEntity(userEntity);
+        return bookMarks.stream().map(BookMark::toDto).toList();
     }
 }
