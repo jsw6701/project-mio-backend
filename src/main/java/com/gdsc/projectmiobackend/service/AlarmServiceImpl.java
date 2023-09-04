@@ -10,6 +10,7 @@ import com.gdsc.projectmiobackend.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -28,7 +29,7 @@ public class AlarmServiceImpl implements AlarmService{
     }
 
     @Override
-    public Alarm getAllAlarm(String email){
+    public List<Alarm> getAllAlarm(String email){
         UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
         return alarmRepository.findByUserEntity(user);
     }

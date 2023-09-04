@@ -23,6 +23,7 @@ public class UserDto {
     private Status status;
     private Long mannerCount;
     private String grade;
+    private String activityLocation;
     public UserDto(UserEntity user) {
         this.id = user.getId();
         this.email = user.getEmail();
@@ -36,5 +37,6 @@ public class UserDto {
         this.status = user.getStatus();
         this.mannerCount = user.getMannerCount();
         this.grade = user.getGrade();
+        this.activityLocation = user.getActivityLocation();
     }
 }

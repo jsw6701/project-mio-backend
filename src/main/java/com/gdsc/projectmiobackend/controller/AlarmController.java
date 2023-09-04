@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @AllArgsConstructor
 @RestController
 @Tag(name = "알람")
@@ -33,7 +35,7 @@ public class AlarmController {
 
     @Operation(summary = "알람 조회")
     @GetMapping("/readAll")
-    public ResponseEntity<?> readAll(
+    public ResponseEntity<List<Alarm>> readAll(
             @AuthenticationPrincipal UserInfo user){
 
         return ResponseEntity.ok(this.alarmService.getAllAlarm(user.getEmail()));

@@ -5,7 +5,7 @@ import com.gdsc.projectmiobackend.entity.Participants;
 import java.util.List;
 
 public interface PostParticipationService {
-    String participateInPost(Long postId, String email, String content);
+    void participateInPost(Long postId, String email, String content);
 
     Boolean checkParticipate(Long postId, String email);
 

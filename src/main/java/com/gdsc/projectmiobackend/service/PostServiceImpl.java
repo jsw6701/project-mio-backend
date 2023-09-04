@@ -280,8 +280,8 @@ public class PostServiceImpl implements PostService{
     }
 
     @Override
-    public List<PostDto> findByLocation(String location){
-        List<Post> postList = postRepository.findByLocation(location);
+    public List<PostDto> findByLocation(String location) {
+        List<Post> postList = postRepository.findByLocationContaining(location);
         return postList.stream().map(Post::toDto).toList();
     }
 }
