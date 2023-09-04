@@ -31,7 +31,7 @@ public class BookMarkController {
     }
 
     @Operation(summary = "회원별 북마크 조회")
-    @GetMapping("/user")
+    @GetMapping("/read")
     public ResponseEntity<List<BookMarkDto>> readBookMark(@AuthenticationPrincipal UserInfo user){
         List<BookMarkDto> bookMarks = this.bookMarkService.getUserBookMarkList(user.getEmail());
         return ResponseEntity.ok(bookMarks);
