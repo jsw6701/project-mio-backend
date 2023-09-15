@@ -18,4 +18,7 @@ public class AdditionalUserPatchDto {
 
     @Schema(description = "계좌번호", example = "국민 1234567890")
     private String accountNumber;
+
+    @Schema(description = "활동지역", example = "서울 노원구 하계동")
+    private String activityLocation;
 }

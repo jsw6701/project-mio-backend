@@ -51,6 +51,8 @@ public class UserEntity{
 
     private String grade;
 
+    private String activityLocation;
+
     public UserEntity(GoogleOAuth2UserInfo userInfo) {
         this.email = userInfo.getEmail();
         this.studentId = userInfo.getEmail().split("@")[0];
