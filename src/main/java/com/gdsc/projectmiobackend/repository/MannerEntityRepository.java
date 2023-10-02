@@ -7,5 +7,7 @@ import java.util.List;
 
 public interface MannerEntityRepository extends JpaRepository<MannerEntity, Long> {
 
-    List<MannerEntity> findAllByUserId(Long userId);
+    List<MannerEntity> findAllByGetUserId(Long userId);
+
+    List<MannerEntity> findAllByPostUserId(Long userId);
 }

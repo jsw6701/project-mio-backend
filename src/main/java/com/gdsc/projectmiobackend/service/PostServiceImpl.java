@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -48,7 +49,7 @@ public class PostServiceImpl implements PostService{
     @Override
     public Post updateById(Long id, PostPatchRequestDto postPatchRequestDto, String email){
         UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
-        Post post = this.findById(id);
+        Post post = postRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid Post ID: " + id));
         Category category = categoryRepository.findById(postPatchRequestDto.getCategoryId()).orElseThrow(() -> new IllegalArgumentException("TODO 생성실패"));
 
         if (!Objects.equals(post.getUser().getEmail(), user.getEmail())) {
@@ -199,8 +200,7 @@ public class PostServiceImpl implements PostService{
 
 
 
-        MannerEntity mannerEntity = new MannerEntity(mannerDriverUpdateRequestDto.getManner(), mannerDriverUpdateRequestDto.getContent(), driver.getId(), LocalDateTime.now());
-
+        MannerEntity mannerEntity = new MannerEntity(mannerDriverUpdateRequestDto.getManner(), mannerDriverUpdateRequestDto.getContent(), driver.getId(), currentUser.getId(), LocalDateTime.now());
         mannerEntityRepository.save(mannerEntity);
         this.userRepository.save(driver);
     }
@@ -240,7 +240,7 @@ public class PostServiceImpl implements PostService{
         participantsRepository.save(participants);
         targetUser.setGrade(calculateGrade(targetUser.getMannerCount()));
 
-        MannerEntity mannerEntity = new MannerEntity(mannerPassengerUpdateRequestDto.getManner(), mannerPassengerUpdateRequestDto.getContent(), targetUser.getId(), LocalDateTime.now());
+        MannerEntity mannerEntity = new MannerEntity(mannerPassengerUpdateRequestDto.getManner(), mannerPassengerUpdateRequestDto.getContent(), targetUser.getId(), currentUser.getId(), LocalDateTime.now());
         mannerEntityRepository.save(mannerEntity);
         this.userRepository.save(targetUser);
     }
@@ -283,5 +283,39 @@ public class PostServiceImpl implements PostService{
     public List<PostDto> findByLocation(String location) {
         List<Post> postList = postRepository.findByLocationContaining(location);
         return postList.stream().map(Post::toDto).toList();
+    }
+
+    @Override
+    public Page<PostDto> reviewsCanBeWritten(String email, Pageable pageable) {
+        UserEntity user = this.userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저가 없습니다."));
+
+        // 탑승자로 참여한 리스트
+        List<Participants> participants = this.participantsRepository.findByUserId(user.getId());
+
+        // 운전자로 참여한 리스트
+        List<Participants> participants1 = this.participantsRepository.findByPostUserId(user.getId());
+
+        List<Post> posts = new ArrayList<>();
+
+        // 탑승자로 참여한 리스트 중 운전자 평가를 하지 않은 리스트
+        for(Participants p : participants){
+            if(p.getApprovalOrReject() == ApprovalOrReject.FINISH){
+                if(p.getDriverMannerFinish() == false){
+                    posts.add(p.getPost());
+                }
+            }
+        }
+
+
+        // 운전자로 참여한 리스트 중 탑승자 평가를 하지 않은 리스트
+        for(Participants p : participants1){
+            if(p.getApprovalOrReject() == ApprovalOrReject.FINISH){
+                if(p.getPassengerMannerFinish() == false){
+                    posts.add(p.getPost());
+                }
+            }
+        }
+
+        return new PageImpl<>(posts.stream().map(Post::toDto).toList(), pageable, posts.size());
     }
 }

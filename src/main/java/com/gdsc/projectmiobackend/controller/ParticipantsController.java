@@ -47,7 +47,7 @@ public class ParticipantsController {
         List<Participants> participants = participantsService.getParticipantsByPostId(postId);
 
         return ResponseEntity.ok(participants.stream()
-                .map(participant -> new ParticipateDto(participant.getPost().getId(), participant.getUser().getId(), participant.getContent()))
+                .map(participant -> new ParticipateDto(participant.getPost().getId(), participant.getUser().getId(), postId, participant.getContent(), participant.getApprovalOrReject()))
                 .collect(Collectors.toList()));
     }
 

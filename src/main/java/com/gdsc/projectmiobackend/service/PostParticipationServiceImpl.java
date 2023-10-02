@@ -49,6 +49,7 @@ public class PostParticipationServiceImpl implements PostParticipationService {
         participants.setVerifyFinish(false);
         participants.setDriverMannerFinish(false);
         participants.setPassengerMannerFinish(false);
+        participants.setPostUserId(post.getUser().getId());
         participantsRepository.save(participants);
     }
 

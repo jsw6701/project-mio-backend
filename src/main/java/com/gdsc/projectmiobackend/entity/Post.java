@@ -107,6 +107,7 @@ public class Post {
                 .category(category)
                 .verifyGoReturn(verifyGoReturn)
                 .numberOfPassengers(numberOfPassengers)
+                .participantsCount(participantsCount)
                 .user(user)
                 .viewCount(viewCount)
                 .verifyFinish(verifyFinish)

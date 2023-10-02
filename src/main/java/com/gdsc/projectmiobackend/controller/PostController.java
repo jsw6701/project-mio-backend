@@ -261,4 +261,20 @@ public class PostController {
         Page<PostDto> postList = this.postService.findByParticipate(user.getEmail(), pageable);
         return ResponseEntity.ok(postList);
     }
+
+    @Operation(summary = "리뷰 작성 가능한 게시글")
+    @Parameters({
+            @Parameter(name = "sort", description = "sort specification",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "createDate,desc"), example = "createDate,desc"),
+            @Parameter(name = "page", description = "page number",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "integer", defaultValue = "0")),
+            @Parameter(name = "size", description = "page size",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "integer", defaultValue = "5"))
+    })
+    @GetMapping("/post/review")
+    public ResponseEntity<Page<PostDto>> readPostByReview(@AuthenticationPrincipal UserInfo user,
+                                                          @Parameter(hidden = true) Pageable pageable) {
+        Page<PostDto> postList = this.postService.reviewsCanBeWritten(user.getEmail(), pageable);
+        return ResponseEntity.ok(postList);
+    }
 }
