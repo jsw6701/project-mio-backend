@@ -24,14 +24,17 @@ public class MannerEntity {
 
     private String content;
 
-    private Long userId;
+    private Long getUserId;
+
+    private Long postUserId;
 
     private LocalDateTime createDate;
 
-    public MannerEntity(String manner, String content, Long userId, LocalDateTime createDate) {
+    public MannerEntity(String manner, String content, Long getUserId, Long postUserId, LocalDateTime createDate) {
         this.manner = manner;
         this.content = content;
-        this.userId = userId;
+        this.getUserId = getUserId;
+        this.postUserId = postUserId;
         this.createDate = createDate;
     }
 
@@ -40,7 +43,7 @@ public class MannerEntity {
                 .id(id)
                 .manner(manner)
                 .content(content)
-                .userId(userId)
+                .getUserId(getUserId)
                 .createDate(createDate.toString())
                 .build();
     }

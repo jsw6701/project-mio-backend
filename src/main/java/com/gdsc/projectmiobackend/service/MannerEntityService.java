@@ -6,5 +6,7 @@ import java.util.List;
 
 public interface MannerEntityService {
 
-    List<MannerDto> getMannersByUserId(Long userId);
+    List<MannerDto> getMannersByPostUserId(Long userId);
+
+    List<MannerDto> getMannersByGetUserId(Long userId);
 }
