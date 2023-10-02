@@ -49,7 +49,7 @@ public class PostServiceImpl implements PostService{
     @Override
     public Post updateById(Long id, PostPatchRequestDto postPatchRequestDto, String email){
         UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
-        Post post = this.findById(id);
+        Post post = postRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid Post ID: " + id));
         Category category = categoryRepository.findById(postPatchRequestDto.getCategoryId()).orElseThrow(() -> new IllegalArgumentException("TODO 생성실패"));
 
         if (!Objects.equals(post.getUser().getEmail(), user.getEmail())) {
