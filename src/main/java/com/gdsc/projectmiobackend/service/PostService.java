@@ -42,4 +42,6 @@ public interface PostService {
     Page<PostDto> findByParticipate(String email, Pageable pageable);
 
     List<PostDto> findByLocation(String location);
+
+    Page<PostDto> reviewsCanBeWritten(String email, Pageable pageable);
 }

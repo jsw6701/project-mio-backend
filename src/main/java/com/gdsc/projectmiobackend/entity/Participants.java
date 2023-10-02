@@ -41,6 +41,9 @@ public class Participants {
     @Nullable
     private String content;
 
+    @Nullable
+    private Long postUserId;
+
     public Participants(Post post, UserEntity user, String content) {
         this.post = post;
         this.user = user;

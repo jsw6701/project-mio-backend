@@ -25,7 +25,7 @@ public class AlarmServiceImpl implements AlarmService{
     public Alarm saveAlarm(AlarmCreateRequestDto alarm){
         UserEntity user = userRepository.findById(alarm.getUserId()).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
         Post post = postRepository.findById(alarm.getPostId()).orElseThrow(() -> new IllegalArgumentException("포스트 정보가 없습니다."));
-        return alarm.toEntity(alarm, post, user);
+        return alarmRepository.save(alarm.toEntity(alarm, post, user));
     }
 
     @Override

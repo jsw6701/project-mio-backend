@@ -15,9 +15,15 @@ public class MannerEntityServiceImpl implements MannerEntityService{
 
     private final MannerEntityRepository mannerEntityRepository;
     @Override
-    public List<MannerDto> getMannersByUserId(Long userId) {
-        List<MannerEntity> mannerEntities = mannerEntityRepository.findAllByUserId(userId);
+    public List<MannerDto> getMannersByPostUserId(Long userId) {
+        List<MannerEntity> mannerEntities = mannerEntityRepository.findAllByGetUserId(userId);
         return mannerEntities.stream().map(MannerEntity::toDto).collect(Collectors.toList());
     }
 
+
+    @Override
+    public List<MannerDto> getMannersByGetUserId(Long userId) {
+        List<MannerEntity> mannerEntities = mannerEntityRepository.findAllByPostUserId(userId);
+        return mannerEntities.stream().map(MannerEntity::toDto).collect(Collectors.toList());
+    }
 }
