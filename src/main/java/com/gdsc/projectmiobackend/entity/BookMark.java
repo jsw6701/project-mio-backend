@@ -37,8 +37,8 @@ public class BookMark {
     public BookMarkDto toDto() {
         return BookMarkDto.builder()
                 .id(id)
-                .post(post)
-                .userEntity(userEntity)
+                .postId(post.getId())
+                .userId(userEntity.getId())
                 .status(status)
                 .build();
     }
