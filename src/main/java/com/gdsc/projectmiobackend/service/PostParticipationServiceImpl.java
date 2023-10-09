@@ -94,6 +94,10 @@ public class PostParticipationServiceImpl implements PostParticipationService {
 
         Participants participants = participantsRepository.findByPostIdAndUserId(postId, user.getId());
 
+        if(participants.getApprovalOrReject() == ApprovalOrReject.APPROVAL){
+            post.setParticipantsCount(post.getParticipantsCount() - 1);
+        }
+
         Alarm alarm = new Alarm(LocalDateTime.now(), "신청을 취소한 사람이 있습니다!", post, participants.getUser());
 
         alarmRepository.save(alarm);
@@ -123,6 +127,10 @@ public class PostParticipationServiceImpl implements PostParticipationService {
 
         if(post.getParticipantsCount() == null){
             post.setParticipantsCount(0L);
+        }
+
+        if(participants.getApprovalOrReject() == ApprovalOrReject.APPROVAL){
+            throw new IllegalArgumentException("이미 승인된 유저입니다.");
         }
 
         if(post.getNumberOfPassengers() <= post.getParticipantsCount()){
