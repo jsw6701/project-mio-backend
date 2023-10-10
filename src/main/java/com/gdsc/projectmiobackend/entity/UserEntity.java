@@ -3,6 +3,7 @@ package com.gdsc.projectmiobackend.entity;
 
 import com.gdsc.projectmiobackend.common.RoleType;
 import com.gdsc.projectmiobackend.common.Status;
+import com.gdsc.projectmiobackend.dto.UserDto;
 import com.gdsc.projectmiobackend.oauth.GoogleOAuth2UserInfo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
@@ -60,5 +61,23 @@ public class UserEntity{
         this.name = userInfo.getName();
         this.roleType = RoleType.MEMBER;
         this.status = Status.ACTIVE;
+    }
+
+    public UserDto toDto(){
+        return UserDto.builder()
+                .id(id)
+                .email(email)
+                .studentId(studentId)
+                .profileImageUrl(profileImageUrl)
+                .name(name)
+                .accountNumber(accountNumber)
+                .activityLocation(activityLocation)
+                .gender(gender)
+                .grade(grade)
+                .mannerCount(mannerCount)
+                .roleType(roleType)
+                .status(status)
+                .verifySmoker(verifySmoker)
+                .build();
     }
 }

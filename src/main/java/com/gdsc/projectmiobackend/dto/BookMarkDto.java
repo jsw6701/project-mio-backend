@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class BookMarkDto {
 
     private Long id;
-    private Long postId;
-    private Long userId;
+    private UserDto user;
+    private PostDto post;
     private Boolean status;
 }
