@@ -1,6 +1,5 @@
 package com.gdsc.projectmiobackend.entity;
 
-import com.gdsc.projectmiobackend.dto.BookMarkDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,14 +31,5 @@ public class BookMark {
         this.post = post;
         this.userEntity = userEntity;
         this.status = status;
-    }
-
-    public BookMarkDto toDto() {
-        return BookMarkDto.builder()
-                .id(id)
-                .post(post)
-                .userEntity(userEntity)
-                .status(status)
-                .build();
     }
 }
