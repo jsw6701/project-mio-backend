@@ -277,4 +277,11 @@ public class PostController {
         Page<PostDto> postList = this.postService.reviewsCanBeWritten(user.getEmail(), pageable);
         return ResponseEntity.ok(postList);
     }
+
+    @Operation(summary = "특정 게시글 가까운 게시글 조회")
+    @GetMapping("/post/distance/{postId}")
+    public ResponseEntity<List<PostDto>> readPostByDistance(@PathVariable Long postId) {
+        List<PostDto> postList = this.postService.findByDistance(postId);
+        return ResponseEntity.ok(postList);
+    }
 }
