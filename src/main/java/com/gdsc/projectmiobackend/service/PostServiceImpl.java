@@ -318,4 +318,39 @@ public class PostServiceImpl implements PostService{
 
         return new PageImpl<>(posts.stream().map(Post::toDto).toList(), pageable, posts.size());
     }
+
+
+    @Override
+    public List<PostDto> findByDistance(Long postId) {
+        List<Post> postList = postRepository.findAll();
+        Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("Invalid Post ID: " + postId));
+        List<Post> postList1 = new ArrayList<>();
+
+        double lat = post.getLatitude();
+        double lon = post.getLongitude();
+
+        for(Post p : postList){
+            double lat1 = p.getLatitude();
+            double lon1 = p.getLongitude();
+            double theta = lon - lon1;
+            double dist = Math.sin(deg2rad(lat)) * Math.sin(deg2rad(lat1)) + Math.cos(deg2rad(lat)) * Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(theta));
+            dist = Math.acos(dist);
+            dist = rad2deg(dist);
+            dist = dist * 60 * 1.1515 * 1.609344;
+            if(dist <= 3){
+                postList1.add(p);
+            }
+        }
+
+
+        return postList.stream().map(Post::toDto).toList();
+    }
+
+    private double deg2rad(double deg) {
+        return (deg * Math.PI / 180.0);
+    }
+
+    private double rad2deg(double rad) {
+        return (rad * 180 / Math.PI);
+    }
 }

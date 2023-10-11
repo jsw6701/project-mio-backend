@@ -44,4 +44,6 @@ public interface PostService {
     List<PostDto> findByLocation(String location);
 
     Page<PostDto> reviewsCanBeWritten(String email, Pageable pageable);
+
+    List<PostDto> findByDistance(Long postId);
 }
