@@ -43,7 +43,23 @@ public class PostServiceImpl implements PostService{
         UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
 
         Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new IllegalArgumentException("TODO 생성실패"));
-        return postRepository.save(postCreateRequestDto.toEntity(category, user));
+
+        Post post = new Post();
+
+        post = postCreateRequestDto.toEntity(category, user);
+
+
+        Participants participants = new Participants(post, user, "작성자");
+        participants.setApprovalOrReject(ApprovalOrReject.APPROVAL);
+        participants.setVerifyFinish(false);
+        participants.setDriverMannerFinish(false);
+        participants.setPassengerMannerFinish(false);
+        participants.setPostUserId(user.getId());
+
+        postRepository.save(post);
+        participantsRepository.save(participants);
+
+        return post;
     }
 
     @Override
