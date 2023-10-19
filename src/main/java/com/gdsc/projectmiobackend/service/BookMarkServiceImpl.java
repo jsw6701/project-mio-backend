@@ -46,6 +46,14 @@ public class BookMarkServiceImpl implements BookMarkService{
     public List<BookMarkDto> getUserBookMarkList(String email){
         UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(()->new IllegalArgumentException("해당 유저가 없습니다."));
         List<BookMark> bookMarks = bookMarkRepository.findByUserEntity(userEntity);
-        return bookMarks.stream().map(BookMark::toDto).toList();
+
+        List<BookMarkDto> bookMarkDtos = bookMarks.stream().map(bookMark -> BookMarkDto.builder()
+                .id(bookMark.getId())
+                .user(bookMark.getUserEntity().toDto())
+                .post(bookMark.getPost().toDto())
+                .status(bookMark.getStatus())
+                .build()).toList();
+
+        return bookMarkDtos;
     }
 }
