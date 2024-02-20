@@ -338,7 +338,7 @@ public class PostServiceImpl implements PostService{
 
     @Override
     public List<PostDto> findByDistance(Long postId) {
-        List<Post> postList = postRepository.findAll();
+        /*List<Post> postList = postRepository.findAll();
         Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("Invalid Post ID: " + postId));
         List<Post> postList1 = new ArrayList<>();
 
@@ -356,17 +356,18 @@ public class PostServiceImpl implements PostService{
             if(dist <= 3){
                 postList1.add(p);
             }
-        }
+        }*/
 
+        List<Post> postList = postRepository.findByDistance(postId);
 
         return postList.stream().map(Post::toDto).toList();
     }
 
-    private double deg2rad(double deg) {
+/*    private double deg2rad(double deg) {
         return (deg * Math.PI / 180.0);
     }
 
     private double rad2deg(double rad) {
         return (rad * 180 / Math.PI);
-    }
+    }*/
 }
