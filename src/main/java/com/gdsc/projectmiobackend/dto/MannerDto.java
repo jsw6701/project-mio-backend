@@ -1,5 +1,6 @@
 package com.gdsc.projectmiobackend.dto;
 
+import com.gdsc.projectmiobackend.common.Manner;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,14 +11,14 @@ import lombok.NoArgsConstructor;
 public class MannerDto {
 
     private Long id;
-    private String manner;
+    private Manner manner;
     private String content;
     private Long getUserId;
     private Long postUserId;
     private String createDate;
 
 
-    public MannerDto(Long id, String manner, String content, Long postUserId, Long getUserId, String createDate) {
+    public MannerDto(Long id, Manner manner, String content, Long postUserId, Long getUserId, String createDate) {
         this.id = id;
         this.manner = manner;
         this.content = content;

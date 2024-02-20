@@ -43,13 +43,17 @@ public class PostParticipationServiceImpl implements PostParticipationService {
             throw new IllegalArgumentException("자신의 게시글에는 신청할 수 없습니다.");
         }*/
 
-        Participants participants = new Participants(post, user, content);
+        Participants participants = Participants.builder()
+                .post(post)
+                .user(user)
+                .content(content)
+                .approvalOrReject(ApprovalOrReject.WAITING)
+                .verifyFinish(false)
+                .driverMannerFinish(false)
+                .passengerMannerFinish(false)
+                .postUserId(post.getUser().getId())
+                .build();
 
-        participants.setApprovalOrReject(ApprovalOrReject.WAITING);
-        participants.setVerifyFinish(false);
-        participants.setDriverMannerFinish(false);
-        participants.setPassengerMannerFinish(false);
-        participants.setPostUserId(post.getUser().getId());
         participantsRepository.save(participants);
     }
 

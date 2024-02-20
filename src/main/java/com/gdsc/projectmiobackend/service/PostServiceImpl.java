@@ -44,17 +44,18 @@ public class PostServiceImpl implements PostService{
 
         Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new IllegalArgumentException("TODO 생성실패"));
 
-        Post post = new Post();
+        Post post = postCreateRequestDto.toEntity(category, user);
 
-        post = postCreateRequestDto.toEntity(category, user);
-
-
-        Participants participants = new Participants(post, user, "작성자");
-        participants.setApprovalOrReject(ApprovalOrReject.APPROVAL);
-        participants.setVerifyFinish(false);
-        participants.setDriverMannerFinish(false);
-        participants.setPassengerMannerFinish(false);
-        participants.setPostUserId(user.getId());
+        Participants participants = Participants.builder()
+                .post(post)
+                .user(user)
+                .content("작성자")
+                .approvalOrReject(ApprovalOrReject.APPROVAL)
+                .verifyFinish(false)
+                .driverMannerFinish(false)
+                .passengerMannerFinish(false)
+                .postUserId(user.getId())
+                .build();
 
         postRepository.save(post);
         participantsRepository.save(participants);
@@ -194,9 +195,9 @@ public class PostServiceImpl implements PostService{
                 participantsRepository.save(participants1);
 
                 switch (mannerDriverUpdateRequestDto.getManner()) {
-                    case "good" -> driver.setMannerCount(driverMannerCount + 1);
-                    case "bad" -> driver.setMannerCount(driverMannerCount - 1);
-                    case "normal" -> driver.setMannerCount(driverMannerCount);
+                    case GOOD -> driver.setMannerCount(driverMannerCount + 1);
+                    case BAD -> driver.setMannerCount(driverMannerCount - 1);
+                    case NORMAL -> driver.setMannerCount(driverMannerCount);
                     default -> throw new IllegalStateException("잘못된 평가입니다.");
                 }
 
@@ -246,9 +247,9 @@ public class PostServiceImpl implements PostService{
         Long targetUserMannerCount = targetUser.getMannerCount();
 
         switch (mannerPassengerUpdateRequestDto.getManner()) {
-            case "good" -> targetUser.setMannerCount(targetUserMannerCount + 1);
-            case "bad" -> targetUser.setMannerCount(targetUserMannerCount - 1);
-            case "normal" -> targetUser.setMannerCount(targetUserMannerCount);
+            case GOOD -> targetUser.setMannerCount(targetUserMannerCount + 1);
+            case BAD -> targetUser.setMannerCount(targetUserMannerCount - 1);
+            case NORMAL -> targetUser.setMannerCount(targetUserMannerCount);
             default -> throw new IllegalStateException("잘못된 평가입니다.");
         }
 
