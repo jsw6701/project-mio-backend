@@ -1,5 +1,6 @@
 package com.gdsc.projectmiobackend.dto.request;
 
+import com.gdsc.projectmiobackend.common.Manner;
 import lombok.*;
 
 @Getter
@@ -8,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MannerPassengerUpdateRequestDto {
-    private String manner;
+    private Manner manner;
 
     private String content;
 

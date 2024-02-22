@@ -228,7 +228,7 @@ public class PostController {
         return ResponseEntity.ok(participateGetDto);
     }
 
-    @Operation(summary = "기사 매너 평가")
+    @Operation(summary = "기사 매너 평가", description = "매너는 GOOD, BAD, NORMAL 중에서 선택해야 합니다.")
     @PostMapping("/post/{postId}/evaluation/driver")
     public ResponseEntity<?> updateDriverMannerScore(@PathVariable Long postId,
                                                      @AuthenticationPrincipal UserInfo user,
@@ -237,7 +237,7 @@ public class PostController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "탑승자 매너 평가")
+    @Operation(summary = "탑승자 매너 평가" , description = "매너는 GOOD, BAD, NORMAL 중에서 선택해야 합니다.")
     @PostMapping("/post/{userId}/evaluation/passenger")
     public ResponseEntity<?> updatePassengersMannerScore(@PathVariable Long userId,
                                                          @AuthenticationPrincipal UserInfo user,
