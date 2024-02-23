@@ -23,7 +23,7 @@ public class AuthController {
 
     @PostMapping("/auth/google")
     public ResponseEntity<TokenResponse> googleLogin(@RequestBody SocialLoginRequest socialLoginRequest) throws Exception {
-        TokenResponse tokenResponse = authService.googleLogin(socialLoginRequest.token());
+        TokenResponse tokenResponse = authService.googleLogin(socialLoginRequest);
         return ResponseEntity.ok(tokenResponse);
     }
 
