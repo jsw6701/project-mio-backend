@@ -1,6 +1,8 @@
 package com.gdsc.projectmiobackend.service;
 
 
+import com.gdsc.projectmiobackend.discord.MsgService;
+import com.gdsc.projectmiobackend.dto.SocialLoginRequest;
 import com.gdsc.projectmiobackend.dto.request.AdditionalUserPatchDto;
 import com.gdsc.projectmiobackend.entity.UserEntity;
 import com.gdsc.projectmiobackend.repository.UserRepository;
@@ -30,35 +32,45 @@ public class AuthService {
     // 인증 로직만 CQRS 예외
     private final UserRepository userRepository;
 
+    private final MsgService msgService;
+
     @Transactional
-    public TokenResponse googleLogin(String idToken) throws Exception {
+    public TokenResponse googleLogin(SocialLoginRequest socialLoginRequest) throws Exception {
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
                 .setAudience(Collections.singletonList(googleClientId))
                 .build();
 
         try {
-            GoogleIdToken googleIdToken = verifier.verify(idToken);
+            GoogleIdToken googleIdToken = verifier.verify(socialLoginRequest.token());
 
             if (googleIdToken == null) {
+                msgService.sendMsg("구글 로그인 에러", socialLoginRequest.method() + " " + socialLoginRequest.url(), "Token ID NULL");
                 throw new Exception("INVALID_TOKEN");
             }
             else {
                 GoogleOAuth2UserInfo userInfo = new GoogleOAuth2UserInfo(googleIdToken.getPayload());
 
                 if(!userInfo.getEmail().contains("@daejin.ac.kr")){
+                    msgService.sendMsg("구글 로그인 에러", socialLoginRequest.method() + " " + socialLoginRequest.url(), "대진대학교 이메일이 아닙니다.");
                     throw new Exception("INVALID_TOKEN");
                 }
 
 
                 if(!userRepository.existsByEmail(userInfo.getEmail())){
                     UserEntity userEntity = new UserEntity(userInfo);
+                    msgService.sendMsg("신규 유저 등록", socialLoginRequest.method() + " " + socialLoginRequest.url(), "신규 유저 등록 : " + userInfo.getEmail() + " / " + userInfo.getName());
                     userRepository.save(userEntity);
+                }
+                else{
+                    msgService.sendMsg("유저 로그인", socialLoginRequest.method() + " " + socialLoginRequest.url(), "유저 로그인 : " + userInfo.getEmail() + " / " + userInfo.getName());
                 }
                 return sendGenerateJwtToken(userInfo.getEmail(), userInfo.getName());
             }
         } catch (Exception e) {
-            throw new Exception("INVALID_TOKEN OR It isn't Daejin Email");
+            msgService.sendMsg("구글 로그인 에러", socialLoginRequest.method() + " " + socialLoginRequest.url(), e.getMessage());
+            throw new Exception("대진대학교 이메일이 아니거나 잘못된 토큰 값입니다.");
         }
+
     }
 
     @Transactional
