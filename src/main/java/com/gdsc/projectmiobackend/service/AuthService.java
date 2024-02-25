@@ -44,30 +44,27 @@ public class AuthService {
             GoogleIdToken googleIdToken = verifier.verify(socialLoginRequest.token());
 
             if (googleIdToken == null) {
-                msgService.sendMsg("구글 로그인 에러", socialLoginRequest.method() + " " + socialLoginRequest.url(), "Token ID NULL");
                 throw new Exception("INVALID_TOKEN");
             }
             else {
                 GoogleOAuth2UserInfo userInfo = new GoogleOAuth2UserInfo(googleIdToken.getPayload());
 
                 if(!userInfo.getEmail().contains("@daejin.ac.kr")){
-                    msgService.sendMsg("구글 로그인 에러", socialLoginRequest.method() + " " + socialLoginRequest.url(), "대진대학교 이메일이 아닙니다.");
-                    throw new Exception("INVALID_TOKEN");
+                    throw new Exception("대진대학교 이메일이 아닙니다.");
                 }
 
 
                 if(!userRepository.existsByEmail(userInfo.getEmail())){
                     UserEntity userEntity = new UserEntity(userInfo);
-                    msgService.sendMsg("신규 유저 등록", socialLoginRequest.method() + " " + socialLoginRequest.url(), "신규 유저 등록 : " + userInfo.getEmail() + " / " + userInfo.getName());
+                    msgService.sendMsg("유저 로그인", userInfo.getEmail() + " / " + userInfo.getName(), "새 유저 생성");
                     userRepository.save(userEntity);
                 }
                 else{
-                    msgService.sendMsg("유저 로그인", socialLoginRequest.method() + " " + socialLoginRequest.url(), "유저 로그인 : " + userInfo.getEmail() + " / " + userInfo.getName());
+                    msgService.sendMsg("유저 로그인", userInfo.getEmail() + " / " + userInfo.getName(), "기존 유저 로그인");
                 }
                 return sendGenerateJwtToken(userInfo.getEmail(), userInfo.getName());
             }
         } catch (Exception e) {
-            msgService.sendMsg("구글 로그인 에러", socialLoginRequest.method() + " " + socialLoginRequest.url(), e.getMessage());
             throw new Exception("대진대학교 이메일이 아니거나 잘못된 토큰 값입니다.");
         }
 
