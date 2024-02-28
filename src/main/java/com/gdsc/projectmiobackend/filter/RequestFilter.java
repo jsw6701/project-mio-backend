@@ -29,13 +29,15 @@ public class RequestFilter implements Filter {
         ContentCachingRequestWrapper requestWrapper = new ContentCachingRequestWrapper((HttpServletRequest) request);
         ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper((HttpServletResponse) response);
 
+        String requestURI = ((HttpServletRequest) request).getRequestURI();
+        String requestMethod = ((HttpServletRequest) request).getMethod();
+
         long start = System.currentTimeMillis();
+
         chain.doFilter(requestWrapper, responseWrapper);
         long end = System.currentTimeMillis();
 
-
-/*
-        log.info("\n" +
+/*        log.info("\n" +
                         "[REQUEST] {} - {} {} - {}\n" +
                         "Headers : {}\n" +
                         "Request : {}\n" +
@@ -46,17 +48,17 @@ public class RequestFilter implements Filter {
                 (end - start) / 1000.0,
                 getHeaders((HttpServletRequest) request),
                 getRequestBody(requestWrapper),
-                getResponseBody(responseWrapper));
-*/
+                getResponseBody(responseWrapper));*/
 
-        if (!((HttpServletRequest) request).getRequestURI().contains("auth")) {
-            msgService.sendMsg(
-                    ((HttpServletRequest) request).getMethod() + " - " + ((HttpServletRequest) request).getRequestURI() + " - " + responseWrapper.getStatus() + " - " + (end - start) / 1000.0,
-                    "Request : " + getRequestBody(requestWrapper) + "\n" +
-                            "Response : " + getResponseBody(responseWrapper),
-                    "실시간 API 로그"
-            );
-        }
+
+
+        msgService.sendMsg(
+                (requestMethod + " - " + requestURI + " - " + responseWrapper.getStatus() + " - " + (end - start) / 1000.0),
+                "Request : " + getRequestBody(requestWrapper) + "\n" +
+                        "Response : " + getResponseBody(responseWrapper),
+                "실시간 API 로그"
+        );
+
     }
 
     private Map getHeaders(HttpServletRequest request) {
