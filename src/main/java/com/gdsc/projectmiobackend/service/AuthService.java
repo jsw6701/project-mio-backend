@@ -40,32 +40,33 @@ public class AuthService {
                 .setAudience(Collections.singletonList(googleClientId))
                 .build();
 
+
+        GoogleIdToken googleIdToken;
         try {
-            GoogleIdToken googleIdToken = verifier.verify(socialLoginRequest.token());
+            googleIdToken = verifier.verify(socialLoginRequest.token());
+        } catch (IllegalArgumentException e) {
+            throw new Exception("토큰 검증 중 오류 발생: " + e.getMessage());
+        }
 
-            if (googleIdToken == null) {
-                throw new Exception("INVALID_TOKEN");
+        if (googleIdToken == null) {
+            throw new Exception("INVALID_TOKEN");
+        }
+        else {
+            GoogleOAuth2UserInfo userInfo = new GoogleOAuth2UserInfo(googleIdToken.getPayload());
+
+            if(!userInfo.getEmail().contains("@daejin.ac.kr")){
+                throw new Exception("대진대학교 이메일이 아닙니다.");
             }
-            else {
-                GoogleOAuth2UserInfo userInfo = new GoogleOAuth2UserInfo(googleIdToken.getPayload());
 
-                if(!userInfo.getEmail().contains("@daejin.ac.kr")){
-                    throw new Exception("대진대학교 이메일이 아닙니다.");
-                }
-
-
-                if(!userRepository.existsByEmail(userInfo.getEmail())){
-                    UserEntity userEntity = new UserEntity(userInfo);
-                    msgService.sendMsg("유저 로그인", userInfo.getEmail() + " / " + userInfo.getName(), "새 유저 생성");
-                    userRepository.save(userEntity);
-                }
-                else{
-                    msgService.sendMsg("유저 로그인", userInfo.getEmail() + " / " + userInfo.getName(), "기존 유저 로그인");
-                }
-                return sendGenerateJwtToken(userInfo.getEmail(), userInfo.getName());
+            if(!userRepository.existsByEmail(userInfo.getEmail())){
+                UserEntity userEntity = new UserEntity(userInfo);
+                msgService.sendMsg("유저 로그인", userInfo.getEmail() + " / " + userInfo.getName(), "새 유저 생성");
+                userRepository.save(userEntity);
             }
-        } catch (Exception e) {
-            throw new Exception("대진대학교 이메일이 아니거나 잘못된 토큰 값입니다.");
+            else{
+                msgService.sendMsg("유저 로그인", userInfo.getEmail() + " / " + userInfo.getName(), "기존 유저 로그인");
+            }
+            return sendGenerateJwtToken(userInfo.getEmail(), userInfo.getName());
         }
 
     }
