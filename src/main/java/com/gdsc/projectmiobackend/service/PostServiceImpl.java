@@ -8,6 +8,7 @@ import com.gdsc.projectmiobackend.dto.request.*;
 import com.gdsc.projectmiobackend.entity.*;
 import com.gdsc.projectmiobackend.repository.*;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -124,6 +125,7 @@ public class PostServiceImpl implements PostService{
     }
 
     @Override
+    @Cacheable(value="postCache", key="#pageable")
     public Page<PostDto> findPostList(Pageable pageable) {
         Page<Post> page = postRepository.findAll(pageable);
         return page.map(Post::toDto);
