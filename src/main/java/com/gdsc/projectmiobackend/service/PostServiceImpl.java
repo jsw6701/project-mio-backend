@@ -8,6 +8,8 @@ import com.gdsc.projectmiobackend.dto.request.*;
 import com.gdsc.projectmiobackend.entity.*;
 import com.gdsc.projectmiobackend.repository.*;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +42,7 @@ public class PostServiceImpl implements PostService{
 
 
     @Override
+    @CacheEvict(value = "postCache", allEntries=true)
     public Post addPostList(PostCreateRequestDto postCreateRequestDto, Long categoryId, String email){
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("유저 정보를 찾을 수 없습니다. 이메일: ") );
@@ -47,7 +50,22 @@ public class PostServiceImpl implements PostService{
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new IllegalArgumentException("TODO 생성실패"));
 
-        Post post = postCreateRequestDto.toEntity(category, user);
+        Post post = Post.builder()
+                .title(postCreateRequestDto.getTitle())
+                .content(postCreateRequestDto.getContent())
+                .targetDate(postCreateRequestDto.getTargetDate())
+                .targetTime(postCreateRequestDto.getTargetTime())
+                .category(category)
+                .verifyGoReturn(postCreateRequestDto.getVerifyGoReturn())
+                .numberOfPassengers(postCreateRequestDto.getNumberOfPassengers())
+                .latitude(postCreateRequestDto.getLatitude())
+                .longitude(postCreateRequestDto.getLongitude())
+                .location(postCreateRequestDto.getLocation())
+                .cost(postCreateRequestDto.getCost())
+                .user(user)
+                .createDate(LocalDateTime.now())
+                .verifyFinish(postCreateRequestDto.getVerifyFinish())
+                .build();
 
         Participants participants = Participants.builder()
                 .post(post)
@@ -67,6 +85,7 @@ public class PostServiceImpl implements PostService{
     }
 
     @Override
+    @CacheEvict(value = "postCache", allEntries=true)
     public Post updateById(Long id, PostPatchRequestDto postPatchRequestDto, String email){
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다. 이메일: " + email));
@@ -74,17 +93,29 @@ public class PostServiceImpl implements PostService{
                 .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다. " + id));
         Category category = categoryRepository.findById(postPatchRequestDto.getCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("카테고리를 찾을 수 없습니다. " + postPatchRequestDto.getCategoryId()));
+
         if (!Objects.equals(post.getUser().getEmail(), user.getEmail())) {
             throw new IllegalStateException("게시물을 수정할 권한이 없습니다. 게시물 ID: " + id);
         }
 
-        post.setCategory(category);
-        post.setContent(postPatchRequestDto.getContent());
+        Post updatePost = post.toBuilder()
+                .title(postPatchRequestDto.getTitle())
+                .content(postPatchRequestDto.getContent())
+                .targetDate(postPatchRequestDto.getTargetDate())
+                .targetTime(postPatchRequestDto.getTargetTime())
+                .category(category)
+                .numberOfPassengers(postPatchRequestDto.getNumberOfPassengers())
+                .latitude(postPatchRequestDto.getLatitude())
+                .longitude(postPatchRequestDto.getLongitude())
+                .location(postPatchRequestDto.getLocation())
+                .cost(postPatchRequestDto.getCost())
+                .build();
 
-        return this.postRepository.save(post);
+        return this.postRepository.save(updatePost);
     }
 
     @Override
+    @CacheEvict(value = "postCache", allEntries=true)
     public Post updateFinishById(Long id, PostVerifyFinishRequestDto postPatchRequestDto, String email){
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다. 이메일: " + email));
@@ -112,6 +143,7 @@ public class PostServiceImpl implements PostService{
     }
 
     @Override
+    @CacheEvict(value = "postCache", allEntries=true)
     public void deletePostList(Long id, String email) {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다. 이메일: " + email));
@@ -124,6 +156,7 @@ public class PostServiceImpl implements PostService{
     }
 
     @Override
+    @Cacheable(value="postCache", key="#pageable")
     public Page<PostDto> findPostList(Pageable pageable) {
         Page<Post> page = postRepository.findAll(pageable);
         return page.map(Post::toDto);

@@ -1,8 +1,5 @@
 package com.gdsc.projectmiobackend.dto.request;
 
-import com.gdsc.projectmiobackend.entity.Category;
-import com.gdsc.projectmiobackend.entity.Post;
-import com.gdsc.projectmiobackend.entity.UserEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -11,7 +8,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.lang.Nullable;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Getter
@@ -62,25 +58,4 @@ public class PostCreateRequestDto {
 
     @Schema(description = "요금", example = "3000")
     private Long cost;
-
-    public Post toEntity(Category category, UserEntity user) {
-
-        return Post.builder()
-                .title(title)
-                .content(content)
-                .createDate(LocalDateTime.now())
-                .targetDate(targetDate)
-                .targetTime(targetTime)
-                .verifyGoReturn(verifyGoReturn)
-                .numberOfPassengers(numberOfPassengers)
-                .category(category)
-                .viewCount(viewCount)
-                .user(user)
-                .verifyFinish(verifyFinish)
-                .latitude(latitude)
-                .longitude(longitude)
-                .location(location)
-                .cost(cost)
-                .build();
-    }
 }
