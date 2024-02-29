@@ -8,6 +8,7 @@ import com.gdsc.projectmiobackend.dto.request.*;
 import com.gdsc.projectmiobackend.entity.*;
 import com.gdsc.projectmiobackend.repository.*;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -41,6 +42,7 @@ public class PostServiceImpl implements PostService{
 
 
     @Override
+    @CacheEvict(value = "postCache", allEntries=true)
     public Post addPostList(PostCreateRequestDto postCreateRequestDto, Long categoryId, String email){
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("유저 정보를 찾을 수 없습니다. 이메일: ") );
@@ -68,6 +70,7 @@ public class PostServiceImpl implements PostService{
     }
 
     @Override
+    @CacheEvict(value = "postCache", allEntries=true)
     public Post updateById(Long id, PostPatchRequestDto postPatchRequestDto, String email){
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다. 이메일: " + email));
@@ -86,6 +89,7 @@ public class PostServiceImpl implements PostService{
     }
 
     @Override
+    @CacheEvict(value = "postCache", allEntries=true)
     public Post updateFinishById(Long id, PostVerifyFinishRequestDto postPatchRequestDto, String email){
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다. 이메일: " + email));
@@ -113,6 +117,7 @@ public class PostServiceImpl implements PostService{
     }
 
     @Override
+    @CacheEvict(value = "postCache", allEntries=true)
     public void deletePostList(Long id, String email) {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다. 이메일: " + email));
