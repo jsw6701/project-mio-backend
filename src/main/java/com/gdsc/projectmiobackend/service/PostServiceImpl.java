@@ -346,6 +346,11 @@ public class PostServiceImpl implements PostService{
 
     @Override
     public List<PostDto> findByLocation(String location) {
+
+        if(location == null || location.isEmpty() || location.isBlank()){
+            throw new IllegalArgumentException("지역을 입력해주세요.");
+        }
+
         List<Post> postList = postRepository.findByLocationContaining(location);
         return postList.stream().map(Post::toDto).toList();
     }
