@@ -2,10 +2,7 @@ package com.gdsc.projectmiobackend.entity;
 
 import com.gdsc.projectmiobackend.dto.PostDto;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
@@ -18,8 +15,10 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
+@AllArgsConstructor
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -76,25 +75,6 @@ public class Post {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
     private List<Participants> participants = new ArrayList<>();
-    @Builder
-    public Post(Long postId, String title, String content, LocalDateTime createDate, LocalDate targetDate, LocalTime targetTime, Category category, Boolean verifyGoReturn, Integer numberOfPassengers, UserEntity user, Long viewCount, Boolean verifyFinish, Double latitude, Double longitude, String location, Long cost) {
-        this.id = postId;
-        this.title = title;
-        this.content = content;
-        this.createDate = createDate;
-        this.targetDate = targetDate;
-        this.targetTime = targetTime;
-        this.category = category;
-        this.verifyGoReturn = verifyGoReturn;
-        this.numberOfPassengers = numberOfPassengers;
-        this.user = user;
-        this.viewCount = viewCount;
-        this.verifyFinish = verifyFinish;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.location = location;
-        this.cost = cost;
-    }
 
     public PostDto toDto() {
         return PostDto.builder()
