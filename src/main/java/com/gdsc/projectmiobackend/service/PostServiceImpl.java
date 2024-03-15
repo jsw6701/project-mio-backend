@@ -8,6 +8,8 @@ import com.gdsc.projectmiobackend.dto.request.*;
 import com.gdsc.projectmiobackend.entity.*;
 import com.gdsc.projectmiobackend.repository.*;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -34,27 +36,47 @@ public class PostServiceImpl implements PostService{
 
     @Override
     public Post findById(Long id) {
-        return postRepository.findById(id).orElse(new Post());
+        return postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다. ID: "+ id));
     }
 
 
     @Override
+    @CacheEvict(value = "postCache", allEntries=true)
     public Post addPostList(PostCreateRequestDto postCreateRequestDto, Long categoryId, String email){
-        UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("유저 정보를 찾을 수 없습니다. 이메일: ") );
 
-        Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new IllegalArgumentException("TODO 생성실패"));
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("TODO 생성실패"));
 
-        Post post = new Post();
+        Post post = Post.builder()
+                .title(postCreateRequestDto.getTitle())
+                .content(postCreateRequestDto.getContent())
+                .targetDate(postCreateRequestDto.getTargetDate())
+                .targetTime(postCreateRequestDto.getTargetTime())
+                .category(category)
+                .verifyGoReturn(postCreateRequestDto.getVerifyGoReturn())
+                .numberOfPassengers(postCreateRequestDto.getNumberOfPassengers())
+                .latitude(postCreateRequestDto.getLatitude())
+                .longitude(postCreateRequestDto.getLongitude())
+                .location(postCreateRequestDto.getLocation())
+                .cost(postCreateRequestDto.getCost())
+                .user(user)
+                .createDate(LocalDateTime.now())
+                .verifyFinish(postCreateRequestDto.getVerifyFinish())
+                .build();
 
-        post = postCreateRequestDto.toEntity(category, user);
-
-
-        Participants participants = new Participants(post, user, "작성자");
-        participants.setApprovalOrReject(ApprovalOrReject.APPROVAL);
-        participants.setVerifyFinish(false);
-        participants.setDriverMannerFinish(false);
-        participants.setPassengerMannerFinish(false);
-        participants.setPostUserId(user.getId());
+        Participants participants = Participants.builder()
+                .post(post)
+                .user(user)
+                .content("작성자")
+                .approvalOrReject(ApprovalOrReject.APPROVAL)
+                .verifyFinish(false)
+                .driverMannerFinish(false)
+                .passengerMannerFinish(false)
+                .postUserId(user.getId())
+                .build();
 
         postRepository.save(post);
         participantsRepository.save(participants);
@@ -63,28 +85,44 @@ public class PostServiceImpl implements PostService{
     }
 
     @Override
+    @CacheEvict(value = "postCache", allEntries=true)
     public Post updateById(Long id, PostPatchRequestDto postPatchRequestDto, String email){
-        UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
-        Post post = postRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid Post ID: " + id));
-        Category category = categoryRepository.findById(postPatchRequestDto.getCategoryId()).orElseThrow(() -> new IllegalArgumentException("TODO 생성실패"));
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다. 이메일: " + email));
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다. " + id));
+        Category category = categoryRepository.findById(postPatchRequestDto.getCategoryId())
+                .orElseThrow(() -> new IllegalArgumentException("카테고리를 찾을 수 없습니다. " + postPatchRequestDto.getCategoryId()));
 
         if (!Objects.equals(post.getUser().getEmail(), user.getEmail())) {
-            throw new IllegalStateException("해당 글을 수정할 권한이 없습니다.");
+            throw new IllegalStateException("게시물을 수정할 권한이 없습니다. 게시물 ID: " + id);
         }
 
-        post.setCategory(category);
-        post.setContent(postPatchRequestDto.getContent());
+        Post updatePost = post.toBuilder()
+                .title(postPatchRequestDto.getTitle())
+                .content(postPatchRequestDto.getContent())
+                .targetDate(postPatchRequestDto.getTargetDate())
+                .targetTime(postPatchRequestDto.getTargetTime())
+                .category(category)
+                .numberOfPassengers(postPatchRequestDto.getNumberOfPassengers())
+                .latitude(postPatchRequestDto.getLatitude())
+                .longitude(postPatchRequestDto.getLongitude())
+                .location(postPatchRequestDto.getLocation())
+                .cost(postPatchRequestDto.getCost())
+                .build();
 
-        return this.postRepository.save(post);
+        return this.postRepository.save(updatePost);
     }
 
     @Override
+    @CacheEvict(value = "postCache", allEntries=true)
     public Post updateFinishById(Long id, PostVerifyFinishRequestDto postPatchRequestDto, String email){
-        UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
-        Post post = this.findById(id);
-
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다. 이메일: " + email));
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다. " + id));
         if (!Objects.equals(post.getUser().getEmail(), user.getEmail())) {
-            throw new IllegalStateException("해당 글을 수정할 권한이 없습니다.");
+            throw new IllegalStateException("게시물을 수정할 권한이 없습니다. 게시물 ID: " + id);
         }
 
         post.setVerifyFinish(postPatchRequestDto.getVerifyFinish());
@@ -105,16 +143,20 @@ public class PostServiceImpl implements PostService{
     }
 
     @Override
+    @CacheEvict(value = "postCache", allEntries=true)
     public void deletePostList(Long id, String email) {
-        UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
-        Post post = this.findById(id);
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다. 이메일: " + email));
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다. " + id));
         if (!Objects.equals(post.getUser().getEmail(), user.getEmail())) {
-            throw new IllegalStateException("해당 글을 삭제할 권한이 없습니다.");
+            throw new IllegalStateException("게시물을 수정할 권한이 없습니다. 게시물 ID: " + id);
         }
         postRepository.deleteById(id);
     }
 
     @Override
+    @Cacheable(value="postCache", key="#pageable")
     public Page<PostDto> findPostList(Pageable pageable) {
         Page<Post> page = postRepository.findAll(pageable);
         return page.map(Post::toDto);
@@ -122,14 +164,16 @@ public class PostServiceImpl implements PostService{
 
     @Override
     public Page<PostDto> findByCategoryId(Long categoryId, Pageable pageable){
-        Category category = this.categoryRepository.findById(categoryId).orElseThrow(() -> new IllegalArgumentException("카테고리가 없습니다."));
+        Category category = this.categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("카테고리를 찾을 수 없습니다. " + categoryId));
         Page<Post> page = postRepository.findByCategory(category, pageable);
         return page.map(Post::toDto);
     }
 
     @Override
     public Page<PostDto> findByMemberId(Long userId, Pageable pageable){
-        UserEntity user = this.userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("유저가 없습니다."));
+        UserEntity user = this.userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다. 아이디: " + userId));
         Page<Post> page = postRepository.findByUser(user, pageable);
         return page.map(Post::toDto);
     }
@@ -137,11 +181,12 @@ public class PostServiceImpl implements PostService{
     @Override
     public Post showDetailPost(Long id){
 
-        Post post = this.findById(id);
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다. ID: " + id));
 
         post.setViewCount(post.getViewCount() + 1);
 
-        this.postRepository.save(post);
+        postRepository.save(post);
         return postRepository.findById(id).orElse(null);
     }
 
@@ -153,13 +198,15 @@ public class PostServiceImpl implements PostService{
 
     @Override
     public ParticipateGetDto getApprovalUserCountByPost(Long postId){
-        Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("Invalid Post ID: " + postId));
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Post ID: " + postId));
         return new ParticipateGetDto(post.getParticipantsCount(), post.getNumberOfPassengers());
     }
 
     @Override
     public void driverUpdateManner(Long id, String email, MannerDriverUpdateRequestDto mannerDriverUpdateRequestDto){
-        UserEntity currentUser = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
+        UserEntity currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
         Post post = this.findById(id);
 
 
@@ -194,9 +241,9 @@ public class PostServiceImpl implements PostService{
                 participantsRepository.save(participants1);
 
                 switch (mannerDriverUpdateRequestDto.getManner()) {
-                    case "good" -> driver.setMannerCount(driverMannerCount + 1);
-                    case "bad" -> driver.setMannerCount(driverMannerCount - 1);
-                    case "normal" -> driver.setMannerCount(driverMannerCount);
+                    case GOOD -> driver.setMannerCount(driverMannerCount + 1);
+                    case BAD -> driver.setMannerCount(driverMannerCount - 1);
+                    case NORMAL -> driver.setMannerCount(driverMannerCount);
                     default -> throw new IllegalStateException("잘못된 평가입니다.");
                 }
 
@@ -223,8 +270,10 @@ public class PostServiceImpl implements PostService{
 
     @Override
     public void updateParticipatesManner(Long userId, MannerPassengerUpdateRequestDto mannerPassengerUpdateRequestDto, String email){
-        UserEntity targetUser = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
-        UserEntity currentUser = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
+        UserEntity targetUser = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("운전자의 유저정보가 없습니다."));
+        UserEntity currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("로그인 유저정보가 없습니다."));
 
         Participants participants = participantsRepository.findByPostIdAndUserId(mannerPassengerUpdateRequestDto.getPostId(), userId);
 
@@ -246,9 +295,9 @@ public class PostServiceImpl implements PostService{
         Long targetUserMannerCount = targetUser.getMannerCount();
 
         switch (mannerPassengerUpdateRequestDto.getManner()) {
-            case "good" -> targetUser.setMannerCount(targetUserMannerCount + 1);
-            case "bad" -> targetUser.setMannerCount(targetUserMannerCount - 1);
-            case "normal" -> targetUser.setMannerCount(targetUserMannerCount);
+            case GOOD -> targetUser.setMannerCount(targetUserMannerCount + 1);
+            case BAD -> targetUser.setMannerCount(targetUserMannerCount - 1);
+            case NORMAL -> targetUser.setMannerCount(targetUserMannerCount);
             default -> throw new IllegalStateException("잘못된 평가입니다.");
         }
 
@@ -297,6 +346,11 @@ public class PostServiceImpl implements PostService{
 
     @Override
     public List<PostDto> findByLocation(String location) {
+
+        if(location == null || location.isEmpty() || location.isBlank()){
+            throw new IllegalArgumentException("지역을 입력해주세요.");
+        }
+
         List<Post> postList = postRepository.findByLocationContaining(location);
         return postList.stream().map(Post::toDto).toList();
     }
@@ -338,7 +392,7 @@ public class PostServiceImpl implements PostService{
 
     @Override
     public List<PostDto> findByDistance(Long postId) {
-        List<Post> postList = postRepository.findAll();
+        /*List<Post> postList = postRepository.findAll();
         Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("Invalid Post ID: " + postId));
         List<Post> postList1 = new ArrayList<>();
 
@@ -356,17 +410,18 @@ public class PostServiceImpl implements PostService{
             if(dist <= 3){
                 postList1.add(p);
             }
-        }
+        }*/
 
+        List<Post> postList = postRepository.findByDistance(postId);
 
         return postList.stream().map(Post::toDto).toList();
     }
 
-    private double deg2rad(double deg) {
+/*    private double deg2rad(double deg) {
         return (deg * Math.PI / 180.0);
     }
 
     private double rad2deg(double rad) {
         return (rad * 180 / Math.PI);
-    }
+    }*/
 }

@@ -4,6 +4,7 @@ import com.gdsc.projectmiobackend.common.ApprovalOrReject;
 import com.gdsc.projectmiobackend.dto.ParticipateDto;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -44,10 +45,16 @@ public class Participants {
     @Nullable
     private Long postUserId;
 
-    public Participants(Post post, UserEntity user, String content) {
+    @Builder
+    public Participants(Post post, UserEntity user, String content, ApprovalOrReject approvalOrReject, Boolean verifyFinish, Boolean driverMannerFinish, Boolean passengerMannerFinish, Long postUserId) {
         this.post = post;
         this.user = user;
         this.content = content;
+        this.approvalOrReject = approvalOrReject;
+        this.verifyFinish = verifyFinish;
+        this.driverMannerFinish = driverMannerFinish;
+        this.passengerMannerFinish = passengerMannerFinish;
+        this.postUserId = postUserId;
     }
 
     public ParticipateDto toDto() {

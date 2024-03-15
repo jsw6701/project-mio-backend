@@ -1,5 +1,6 @@
 package com.gdsc.projectmiobackend.entity;
 
+import com.gdsc.projectmiobackend.common.Manner;
 import com.gdsc.projectmiobackend.dto.MannerDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -20,7 +21,7 @@ public class MannerEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String manner;
+    private Manner manner;
 
     private String content;
 
@@ -30,7 +31,7 @@ public class MannerEntity {
 
     private LocalDateTime createDate;
 
-    public MannerEntity(String manner, String content, Long getUserId, Long postUserId, LocalDateTime createDate) {
+    public MannerEntity(Manner manner, String content, Long getUserId, Long postUserId, LocalDateTime createDate) {
         this.manner = manner;
         this.content = content;
         this.getUserId = getUserId;

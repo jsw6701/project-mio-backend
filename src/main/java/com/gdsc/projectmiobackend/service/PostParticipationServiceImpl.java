@@ -12,6 +12,7 @@ import com.gdsc.projectmiobackend.repository.PostRepository;
 import com.gdsc.projectmiobackend.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,9 +32,10 @@ public class PostParticipationServiceImpl implements PostParticipationService {
     @Override
     public void participateInPost(Long postId, String email, String content) {
         UserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("유저정보가" +
+                        "+ 없습니다."));
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Post ID: " + postId));
+                .orElseThrow(() -> new IllegalArgumentException("게시글 정보가 없습니다 : " + postId));
 
         if(participantsRepository.findByPostIdAndUserId(postId, user.getId()) != null){
             throw new IllegalArgumentException("이미 신청한 게시글입니다.");
@@ -43,13 +45,17 @@ public class PostParticipationServiceImpl implements PostParticipationService {
             throw new IllegalArgumentException("자신의 게시글에는 신청할 수 없습니다.");
         }*/
 
-        Participants participants = new Participants(post, user, content);
+        Participants participants = Participants.builder()
+                .post(post)
+                .user(user)
+                .content(content)
+                .approvalOrReject(ApprovalOrReject.WAITING)
+                .verifyFinish(false)
+                .driverMannerFinish(false)
+                .passengerMannerFinish(false)
+                .postUserId(post.getUser().getId())
+                .build();
 
-        participants.setApprovalOrReject(ApprovalOrReject.WAITING);
-        participants.setVerifyFinish(false);
-        participants.setDriverMannerFinish(false);
-        participants.setPassengerMannerFinish(false);
-        participants.setPostUserId(post.getUser().getId());
         participantsRepository.save(participants);
     }
 
@@ -58,7 +64,7 @@ public class PostParticipationServiceImpl implements PostParticipationService {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Post ID: " + postId));
+                .orElseThrow(() -> new IllegalArgumentException("게시글 정보가 없습니다 : " + postId));
         List<Participants> participants1 = participantsRepository.findByUserId(user.getId());
 
         for (Participants p : participants1) {
@@ -77,6 +83,10 @@ public class PostParticipationServiceImpl implements PostParticipationService {
     public List<Participants> getParticipantsByPostId(Long postId) {
         List<Participants> participants = participantsRepository.findByPostId(postId);
 
+        if(participants == null){
+            throw new IllegalArgumentException("해당 게시글에 참여한 유저가 없습니다.");
+        }
+
         return participants;
     }
 
@@ -86,7 +96,7 @@ public class PostParticipationServiceImpl implements PostParticipationService {
                 .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
 
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Post ID: " + postId));
+                .orElseThrow(() -> new IllegalArgumentException("게시글 정보가 없습니다 : " + postId));
 
         if(Objects.equals(post.getTargetDate(), LocalDate.now())){
             throw new IllegalArgumentException("당일 카풀은 취소할 수 없습니다.");
@@ -118,7 +128,7 @@ public class PostParticipationServiceImpl implements PostParticipationService {
 
     @Override
     public void participateApproval(Long participateId, String email) {
-        Participants participants = participantsRepository.findById(participateId).orElseThrow(() -> new IllegalArgumentException("Invalid Participate ID: " + participateId));
+        Participants participants = participantsRepository.findById(participateId).orElseThrow(() -> new IllegalArgumentException("해당 참여 정보가 없습니다 : " + participateId));
         Post post = participants.getPost().getUser().getEmail().equals(email) ? participants.getPost() : null;
 
         if(post == null){
@@ -156,7 +166,7 @@ public class PostParticipationServiceImpl implements PostParticipationService {
     }
 
     public void rejectParticipateInPost(Long participateId, String email){
-        Participants participants = participantsRepository.findById(participateId).orElseThrow(() -> new IllegalArgumentException("Invalid Participate ID: " + participateId));
+        Participants participants = participantsRepository.findById(participateId).orElseThrow(() -> new IllegalArgumentException("해당 참여 정보가 없습니다 : " + participateId));
         Post post = participants.getPost().getUser().getEmail().equals(email) ? participants.getPost() : null;
 
         if(post == null){
@@ -181,6 +191,11 @@ public class PostParticipationServiceImpl implements PostParticipationService {
     public PostDto getApprovalUser(String email){
         UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
         List<Participants> participants = participantsRepository.findByUserId(user.getId());
+
+        if(participants.isEmpty()){
+            throw new IllegalArgumentException("해당 유저는 참여한 게시글이 없습니다.");
+        }
+
         for (Participants participant : participants) {
             if(participant.getApprovalOrReject() == ApprovalOrReject.APPROVAL){
                 return participant.getPost().toDto();
