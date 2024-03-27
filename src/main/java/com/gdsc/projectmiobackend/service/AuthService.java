@@ -54,7 +54,7 @@ public class AuthService {
         else {
             GoogleOAuth2UserInfo userInfo = new GoogleOAuth2UserInfo(googleIdToken.getPayload());
 
-            if(userInfo.getEmail().contains("@daejin.ac.kr") || userInfo.getEmail().contains("anes53027")){
+            if(userInfo.getEmail().contains("@daejin.ac.kr") || userInfo.getEmail().contains("anes53027@")){
                 if(!userRepository.existsByEmail(userInfo.getEmail())){
                     UserEntity userEntity = new UserEntity(userInfo);
                     msgService.sendMsg("유저 로그인", userInfo.getEmail() + " / " + userInfo.getName(), "새 유저 생성");
@@ -65,11 +65,9 @@ public class AuthService {
                 }
                 return sendGenerateJwtToken(userInfo.getEmail(), userInfo.getName());
             }
-
             else{
-                throw new Exception("대진대학교 이메일로 로그인해주세요.");
+                throw new Exception("대진대학교 이메일이 아니거나, 권한이 없습니다.");
             }
-
         }
 
     }
@@ -80,6 +78,7 @@ public class AuthService {
         userEntity.setGender(additionalUserPatchDto.getGender());
         userEntity.setVerifySmoker(additionalUserPatchDto.getVerifySmoker());
         userEntity.setAccountNumber(additionalUserPatchDto.getAccountNumber());
+        userEntity.setActivityLocation(additionalUserPatchDto.getActivityLocation());
         return userEntity;
     }
 
