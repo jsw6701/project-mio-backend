@@ -54,16 +54,15 @@ public class RequestFilter implements Filter {
         responseWrapper.copyBodyToResponse();
 
         if(!(requestURI.contains("/auth/google"))) {
-            if(requestMethod.equals("GET") && responseWrapper.getStatus() != 200){
-                msgService.sendMsg(
-                        (requestMethod + " - " + requestURI + " - " + responseWrapper.getStatus() + " - " + (end - start) / 1000.0),
-                        "Request : " + requestBody + "\n" +
-                                "Response : " + responseBody,
-                        "실시간 API 로그"
-                );
-            }
-            else if(requestMethod.equals("GET")){
-                return;
+            if(requestMethod.equals("GET")){
+                if(responseWrapper.getStatus() != 200){
+                    msgService.sendMsg(
+                            (requestMethod + " - " + requestURI + " - " + responseWrapper.getStatus() + " - " + (end - start) / 1000.0),
+                            "Request : " + requestBody + "\n" +
+                                    "Response : " + responseBody,
+                            "실시간 API 로그"
+                    );
+                }
             }
             else{
                 msgService.sendMsg(
