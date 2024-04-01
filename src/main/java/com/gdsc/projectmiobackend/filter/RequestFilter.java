@@ -29,14 +29,15 @@ public class RequestFilter implements Filter {
         ContentCachingRequestWrapper requestWrapper = new ContentCachingRequestWrapper((HttpServletRequest) request);
         ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper((HttpServletResponse) response);
 
-        String requestURI = ((HttpServletRequest) request).getRequestURI();
-        String requestMethod = ((HttpServletRequest) request).getMethod();
-
         long start = System.currentTimeMillis();
-
-        chain.doFilter(requestWrapper, responseWrapper);
         long end = System.currentTimeMillis();
 
+        chain.doFilter(requestWrapper, responseWrapper);
+
+        String requestMethod = ((HttpServletRequest) request).getMethod();
+        String requestBody = getRequestBody(requestWrapper);
+        String responseBody = getResponseBody(responseWrapper);
+        String requestURI = ((HttpServletRequest) request).getRequestURI();
 /*        log.info("\n" +
                         "[REQUEST] {} - {} {} - {}\n" +
                         "Headers : {}\n" +
@@ -50,15 +51,28 @@ public class RequestFilter implements Filter {
                 getRequestBody(requestWrapper),
                 getResponseBody(responseWrapper));*/
 
+        responseWrapper.copyBodyToResponse();
 
-
-        msgService.sendMsg(
-                (requestMethod + " - " + requestURI + " - " + responseWrapper.getStatus() + " - " + (end - start) / 1000.0),
-                "Request : " + getRequestBody(requestWrapper) + "\n" +
-                        "Response : " + getResponseBody(responseWrapper),
-                "실시간 API 로그"
-        );
-
+        if(!(requestURI.contains("/auth/google"))) {
+            if(requestMethod.equals("GET")){
+                if(responseWrapper.getStatus() != 200){
+                    msgService.sendMsg(
+                            (requestMethod + " - " + requestURI + " - " + responseWrapper.getStatus() + " - " + (end - start) / 1000.0),
+                            "Request : " + requestBody + "\n" +
+                                    "Response : " + responseBody,
+                            "실시간 API 로그"
+                    );
+                }
+            }
+            else{
+                msgService.sendMsg(
+                        (requestMethod + " - " + requestURI + " - " + responseWrapper.getStatus() + " - " + (end - start) / 1000.0),
+                        "Request : " + requestBody + "\n" +
+                                "Response : " + responseBody,
+                        "실시간 API 로그"
+                );
+            }
+        }
     }
 
     private Map getHeaders(HttpServletRequest request) {
