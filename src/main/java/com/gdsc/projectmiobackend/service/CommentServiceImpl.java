@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -27,10 +26,19 @@ public class CommentServiceImpl implements CommentService{
 
     private UserRepository userRepository;
 
+    private UserEntity getUser(String email){
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
+    }
+
+    private Comment getComment(Long commentId){
+        return commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("찾으시는 댓글 정보가 없습니다 : " + commentId));
+    }
+
     @Override
     public Comment addFirstComment(CommentFirstCreateRequestDto commentRequestDto, Long postId, String email) {
-        UserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
+        UserEntity user = getUser(email);
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
 
@@ -42,8 +50,8 @@ public class CommentServiceImpl implements CommentService{
 
     @Override
     public Comment addChildComment(CommentRequestDto commentRequestDto, Long parentId, String email) {
-        UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
-        Comment parentComment = commentRepository.findById(parentId).orElseThrow(() -> new IllegalArgumentException("찾으시는 댓글이 존재하지 않습니다."));
+        UserEntity user = getUser(email);
+        Comment parentComment = getComment(parentId);
         Post post = parentComment.getPost();
 
         Comment comment = commentRequestDto.toEntity(post, user);
@@ -55,7 +63,7 @@ public class CommentServiceImpl implements CommentService{
     @Override
     public List<CommentDto> getCommentList(Long postId) {
         List<Comment> commentList = commentRepository.findByPostId(postId);
-        return commentList.stream().map(this::mapToCommentDto).collect(Collectors.toList());
+        return commentList.stream().map(this::mapToCommentDto).toList();
     }
 
     @Override
@@ -64,19 +72,20 @@ public class CommentServiceImpl implements CommentService{
         List<Comment> filteredParentComments = parentComments.stream()
                 .filter(comment -> comment.getParentComment() == null)
                 .toList();
-        return filteredParentComments.stream().map(this::mapToCommentDto).collect(Collectors.toList());
+        return filteredParentComments.stream().map(this::mapToCommentDto).toList();
     }
 
     @Override
     public List<CommentDto> getChildCommentList(Long parentId) {
-        Comment parentComment = commentRepository.findById(parentId).orElse(null);
-        return parentComment.getChildComments().stream().map(this::mapToCommentDto).collect(Collectors.toList());
+        Comment parentComment = getComment(parentId);
+        return parentComment.getChildComments().stream().map(this::mapToCommentDto).toList();
     }
 
     @Override
     public Comment updateComment(CommentPatchRequestDto commentPatchRequestDto, Long commentId, String email) {
-        UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
-        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new IllegalArgumentException("찾으시는 댓글이 존재하지 않습니다."));
+        UserEntity user = getUser(email);
+        Comment comment = getComment(commentId);
+
         if (!comment.getUser().getEmail().equals(user.getEmail())) {
             throw new IllegalStateException("해당 댓글을 수정할 권한이 없습니다.");
         }
@@ -86,8 +95,9 @@ public class CommentServiceImpl implements CommentService{
 
     @Override
     public Comment deleteComment(Long commentId, String email) {
-        UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
-        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new IllegalArgumentException("찾으시는 댓글이 존재하지 않습니다."));
+        UserEntity user = getUser(email);
+        Comment comment = getComment(commentId);
+
         if (!comment.getUser().getEmail().equals(user.getEmail())) {
             throw new IllegalStateException("해당 댓글을 삭제할 권한이 없습니다.");
         }
@@ -99,7 +109,7 @@ public class CommentServiceImpl implements CommentService{
         List<CommentDto> childComments = comment.getChildComments()
                 .stream()
                 .map(this::mapToCommentDto)
-                .collect(Collectors.toList());
+                .toList();
 
         return CommentDto.builder()
                 .commentId(comment.getCommentId())
