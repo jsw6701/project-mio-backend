@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -17,13 +16,13 @@ public class MannerEntityServiceImpl implements MannerEntityService{
     @Override
     public List<MannerDto> getMannersByPostUserId(Long userId) {
         List<MannerEntity> mannerEntities = mannerEntityRepository.findAllByGetUserId(userId);
-        return mannerEntities.stream().map(MannerEntity::toDto).collect(Collectors.toList());
+        return mannerEntities.stream().map(MannerEntity::toDto).toList();
     }
 
 
     @Override
     public List<MannerDto> getMannersByGetUserId(Long userId) {
         List<MannerEntity> mannerEntities = mannerEntityRepository.findAllByPostUserId(userId);
-        return mannerEntities.stream().map(MannerEntity::toDto).collect(Collectors.toList());
+        return mannerEntities.stream().map(MannerEntity::toDto).toList();
     }
 }

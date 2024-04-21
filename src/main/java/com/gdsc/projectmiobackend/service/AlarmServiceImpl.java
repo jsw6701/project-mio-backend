@@ -21,6 +21,11 @@ public class AlarmServiceImpl implements AlarmService{
     private final PostRepository postRepository;
     private final AlarmRepository alarmRepository;
 
+    private UserEntity getUser(String email){
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
+    }
+
     @Override
     public Alarm saveAlarm(AlarmCreateRequestDto alarm){
         UserEntity user = userRepository.findById(alarm.getUserId()).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
@@ -30,13 +35,13 @@ public class AlarmServiceImpl implements AlarmService{
 
     @Override
     public List<Alarm> getAllAlarm(String email){
-        UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
+        UserEntity user = getUser(email);
         return alarmRepository.findByUserEntity(user);
     }
 
     @Override
     public void deleteAlarm(Long id, String email){
-        UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다."));
+        UserEntity user = getUser(email);
 
         Alarm alarm = alarmRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("알람 정보가 없습니다."));
         if(Objects.equals(alarm.getUserEntity().getId(), user.getId())){
