@@ -292,7 +292,9 @@ public class PostParticipationServiceImpl implements PostParticipationService {
         }
 
         for (Participants participant : participants) {
-            if(participant.getApprovalOrReject() == ApprovalOrReject.APPROVAL){
+            if(participant.getApprovalOrReject() == ApprovalOrReject.APPROVAL ||
+                    participant.getApprovalOrReject() == ApprovalOrReject.FINISH
+            ){
                 postList.add(participant.getPost().toDto());
             }
         }
