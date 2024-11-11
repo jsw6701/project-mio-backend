@@ -2,6 +2,7 @@ package com.gdsc.projectmiobackend.service;
 
 
 import com.gdsc.projectmiobackend.common.AccountApprovalStatus;
+import com.gdsc.projectmiobackend.common.Status;
 import com.gdsc.projectmiobackend.discord.MsgService;
 import com.gdsc.projectmiobackend.dto.SocialLoginRequest;
 import com.gdsc.projectmiobackend.dto.request.AdditionalUserPatchDto;
@@ -81,6 +82,26 @@ public class AuthService {
         userEntity.setVerifySmoker(additionalUserPatchDto.getVerifySmoker());
         userEntity.setAccountNumber(additionalUserPatchDto.getAccountNumber());
         userEntity.setActivityLocation(additionalUserPatchDto.getActivityLocation());
+        return userEntity;
+    }
+
+    @Transactional
+    public UserEntity delete(Long userId) throws Exception {
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new Exception("INVALID_TOKEN"));
+        userEntity.setAccountNumber("(알 수 없음)");
+        userEntity.setActivityLocation("(알 수 없음)");
+        userEntity.setVerifySmoker(false);
+        userEntity.setEmail("(알 수 없음)");
+        userEntity.setGender(false);
+        userEntity.setMannerCount(0L);
+        userEntity.setName("(알 수 없음)");
+        userEntity.setProfileImageUrl("(알 수 없음)");
+        userEntity.setRoleType(RoleType.MEMBER);
+        userEntity.setStatus(Status.SUSPEND);
+        userEntity.setStudentId("(알 수 없음)");
+        userEntity.setGrade("(알 수 없음)");
+
+        userRepository.save(userEntity);
         return userEntity;
     }
 

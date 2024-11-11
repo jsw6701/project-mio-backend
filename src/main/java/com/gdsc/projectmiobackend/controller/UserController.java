@@ -51,4 +51,11 @@ public class UserController {
         UserEntity user = authService.setAccountStatus(requestDto.getStatus(), userInfo);
         return ResponseEntity.ok(new UserDto(user));
     }
+
+    @Operation(summary = "유저 정보 삭제")
+    @PatchMapping("/user/delete/{userId}")
+    public ResponseEntity<UserDto> deleteUser(@PathVariable Long userId) throws Exception {
+        UserEntity user = authService.delete(userId);
+        return ResponseEntity.ok(new UserDto(user));
+    }
 }
