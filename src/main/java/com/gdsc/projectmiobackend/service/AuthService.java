@@ -2,11 +2,13 @@ package com.gdsc.projectmiobackend.service;
 
 
 import com.gdsc.projectmiobackend.common.AccountApprovalStatus;
+import com.gdsc.projectmiobackend.common.ErrorCode;
 import com.gdsc.projectmiobackend.common.Status;
 import com.gdsc.projectmiobackend.discord.MsgService;
 import com.gdsc.projectmiobackend.dto.SocialLoginRequest;
 import com.gdsc.projectmiobackend.dto.request.AdditionalUserPatchDto;
 import com.gdsc.projectmiobackend.entity.UserEntity;
+import com.gdsc.projectmiobackend.exception.CustomException;
 import com.gdsc.projectmiobackend.jwt.dto.UserInfo;
 import com.gdsc.projectmiobackend.repository.UserRepository;
 import com.gdsc.projectmiobackend.common.RoleType;
@@ -48,11 +50,11 @@ public class AuthService {
         try {
             googleIdToken = verifier.verify(socialLoginRequest.token());
         } catch (IllegalArgumentException e) {
-            throw new Exception("토큰 검증 중 오류 발생: " + e.getMessage());
+            throw new CustomException(ErrorCode.INVALID_TOKEN_VALUE);
         }
 
         if (googleIdToken == null) {
-            throw new Exception("INVALID_TOKEN");
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
         else {
             GoogleOAuth2UserInfo userInfo = new GoogleOAuth2UserInfo(googleIdToken.getPayload());
@@ -64,6 +66,11 @@ public class AuthService {
                 userRepository.save(userEntity);
             }
             else{
+                UserEntity userEntity = userRepository.findByEmail(userInfo.getEmail()).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+                if(userEntity.getStatus().equals(Status.SUSPEND)){
+                    throw new CustomException(ErrorCode.SUSPEND_USER);
+                }
+
                 msgService.sendMsg("유저 로그인", userInfo.getEmail() + " / " + userInfo.getName(), "기존 유저 로그인");
             }
             return sendGenerateJwtToken(userInfo.getEmail(), userInfo.getName());
@@ -91,7 +98,6 @@ public class AuthService {
         userEntity.setAccountNumber("(알 수 없음)");
         userEntity.setActivityLocation("(알 수 없음)");
         userEntity.setVerifySmoker(false);
-        userEntity.setEmail("(알 수 없음)");
         userEntity.setGender(false);
         userEntity.setMannerCount(0L);
         userEntity.setName("(알 수 없음)");
