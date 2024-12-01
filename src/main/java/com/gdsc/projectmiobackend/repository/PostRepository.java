@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
@@ -26,6 +27,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findByLatitudeAndLongitudeAndIsDeleteYN(Double latitude, Double longitude, String isDeleteYN);
 
     List<Post> findByLocationContainingAndIsDeleteYN(String location, String isDeleteYN);
+
+    Page<Post> findPageByCategoryAndIsDeleteYNAndPostTypeAndTargetDate(Category category, String isDeleteYN, PostType postType, LocalDate targetDate, Pageable pageable);
+    List<Post> findListByCategoryAndIsDeleteYNAndPostTypeAndTargetDateOrderByCreateDate(Category category, String isDeleteYN, PostType postType, LocalDate targetDate);
 
     @Query("SELECT p FROM Post p WHERE (6371 * acos(cos(radians((SELECT latitude FROM Post WHERE id = ?1))) * cos(radians(p.latitude)) * cos(radians(p.longitude) - radians((SELECT longitude FROM Post WHERE id = ?1))) + sin(radians((SELECT latitude FROM Post WHERE id = ?1))) * sin(radians(p.latitude)))) < 3")
     List<Post> findByDistanceAndIsDeleteYN(Long postId, String isDeleteYN);

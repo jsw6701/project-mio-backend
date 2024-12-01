@@ -8,6 +8,7 @@ import com.gdsc.projectmiobackend.dto.request.*;
 import com.gdsc.projectmiobackend.entity.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,6 +30,12 @@ public interface PostService {
     Page<PostDto> findPostList(Pageable pageable);
 
     Page<PostDto> findByRegion3Depth(String email, Pageable pageable);
+
+    @Transactional(readOnly = true)
+    Page<PostDto> findMainPagePaging(Pageable pageable, PostMainPageRequestDto postMainPageRequestDto);
+
+    @Transactional(readOnly = true)
+    List<PostDto> findMainPageList(PostMainPageRequestDto postMainPageRequestDto);
 
     Page<PostDto> findByCategoryId(Long categoryId, Pageable pageable);
 

@@ -2,17 +2,12 @@ package com.gdsc.projectmiobackend.service;
 
 
 import com.gdsc.projectmiobackend.common.ApprovalOrReject;
-import com.gdsc.projectmiobackend.common.ErrorCode;
 import com.gdsc.projectmiobackend.common.PostType;
 import com.gdsc.projectmiobackend.dto.ParticipateGetDto;
 import com.gdsc.projectmiobackend.dto.PostDto;
 import com.gdsc.projectmiobackend.dto.PostMsgDto;
-import com.gdsc.projectmiobackend.dto.request.MannerDriverUpdateRequestDto;
-import com.gdsc.projectmiobackend.dto.request.MannerPassengerUpdateRequestDto;
-import com.gdsc.projectmiobackend.dto.request.PostCreateRequestDto;
-import com.gdsc.projectmiobackend.dto.request.PostPatchRequestDto;
+import com.gdsc.projectmiobackend.dto.request.*;
 import com.gdsc.projectmiobackend.entity.*;
-import com.gdsc.projectmiobackend.exception.CustomException;
 import com.gdsc.projectmiobackend.notification.service.impl.NotificationServiceImpl;
 import com.gdsc.projectmiobackend.repository.*;
 import lombok.AllArgsConstructor;
@@ -53,7 +48,7 @@ public class PostServiceImpl implements PostService{
      */
     private UserEntity getUserByEmail(String email){
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new IllegalArgumentException("유저 정보를 찾을 수 없습니다. 이메일: " + email));
     }
 
     /**
@@ -63,7 +58,7 @@ public class PostServiceImpl implements PostService{
      */
     private Post getPostById(Long id){
         return postRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
+                .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다. ID: " + id));
     }
 
     /**
@@ -73,7 +68,7 @@ public class PostServiceImpl implements PostService{
      */
     private void checkPostUser(Post post, UserEntity user){
         if (!Objects.equals(post.getUser().getEmail(), user.getEmail())) {
-            throw new CustomException(ErrorCode.ACCESS_DENIED);
+            throw new IllegalStateException("게시물을 수정할 권한이 없습니다. 게시물 ID: " + post.getId());
         }
     }
 
@@ -96,7 +91,7 @@ public class PostServiceImpl implements PostService{
     public PostDto addPost(PostCreateRequestDto postCreateRequestDto, Long categoryId, String email){
         UserEntity user = getUserByEmail(email);
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
+                .orElseThrow(() -> new IllegalArgumentException("TODO 생성실패"));
         Post post = postCreateRequestDto.toEntity(user, category);
         Participants participants = Participants.builder()
                 .post(post)
@@ -130,7 +125,7 @@ public class PostServiceImpl implements PostService{
         UserEntity user = getUserByEmail(email);
         Post post = getPostById(id);
         Category category = categoryRepository.findById(postPatchRequestDto.getCategoryId())
-                .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
+                .orElseThrow(() -> new IllegalArgumentException("카테고리를 찾을 수 없습니다. " + postPatchRequestDto.getCategoryId()));
 
         checkPostUser(post, user);
 
@@ -235,11 +230,11 @@ public class PostServiceImpl implements PostService{
         Post post = getPostById(id);
 
         if(!post.getPostType().equals(PostType.BEFORE_DEADLINE)) {
-            throw new CustomException(ErrorCode.POST_DEADLINE);
+            throw new IllegalStateException("마감 후에는 게시글을 지울 수 없습니다.");
         }
 
         if(post.getTargetDate().equals(LocalDate.now())) {
-            throw new CustomException(ErrorCode.POST_NOT_DELETE_TODAY);
+            throw new IllegalStateException("카풀(택시) 당일은 게시글을 지울 수 없습니다.");
         }
 
         UserEntity user = getUserByEmail(email);
@@ -256,12 +251,39 @@ public class PostServiceImpl implements PostService{
         return page.map(Post::toDto);
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public Page<PostDto> findMainPagePaging(Pageable pageable, PostMainPageRequestDto postMainPageRequestDto) {
+        Page<Post> page = postRepository.findPageByCategoryAndIsDeleteYNAndPostTypeAndTargetDate(
+                categoryRepository.findById(postMainPageRequestDto.getCategoryId())
+                        .orElseThrow(() -> new IllegalArgumentException("카테고리를 찾을 수 없습니다. " + postMainPageRequestDto.getCategoryId())),
+                "N",
+                postMainPageRequestDto.getPostType(),
+                postMainPageRequestDto.getTargetDate(),
+                pageable);
+        return page.map(Post::toDto);
+    }
+
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<PostDto> findMainPageList(PostMainPageRequestDto postMainPageRequestDto) {
+        List<Post> postList = postRepository.findListByCategoryAndIsDeleteYNAndPostTypeAndTargetDateOrderByCreateDate(
+                categoryRepository.findById(postMainPageRequestDto.getCategoryId())
+                        .orElseThrow(() -> new IllegalArgumentException("카테고리를 찾을 수 없습니다. " + postMainPageRequestDto.getCategoryId())),
+                "N",
+                postMainPageRequestDto.getPostType(),
+                postMainPageRequestDto.getTargetDate());
+        return postList.stream().map(Post::toDto).toList();
+    }
+
+
     @Override
     @Transactional(readOnly = true)
     //@Cacheable(value="postCache", key="#categoryId + 'category_' + #pageable.pageNumber + '_' + #pageable.pageSize")
     public Page<PostDto> findByCategoryId(Long categoryId, Pageable pageable){
         Category category = this.categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
+                .orElseThrow(() -> new IllegalArgumentException("카테고리를 찾을 수 없습니다. " + categoryId));
         Page<Post> page = postRepository.findByCategoryAndIsDeleteYNAndPostType(category, pageable, "N", PostType.BEFORE_DEADLINE);
         return page.map(Post::toDto);
     }
@@ -271,7 +293,7 @@ public class PostServiceImpl implements PostService{
     //@Cacheable(value="postCache", key="#userId + 'userId_' + #pageable.pageNumber + '_' + #pageable.pageSize")
     public Page<PostDto> findByMemberId(Long userId, Pageable pageable){
         UserEntity user = this.userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다. 아이디: " + userId));
         Page<Post> page = postRepository.findByUserAndIsDeleteYN(user, pageable, "N");
         return page.map(Post::toDto);
     }
@@ -342,7 +364,7 @@ public class PostServiceImpl implements PostService{
         }
 
         if(!post.getPostType().equals(PostType.COMPLETED)){
-            throw new CustomException(ErrorCode.POST_NOT_COMPLETED);
+            throw new IllegalStateException("해당 글은 완료되지 않았습니다.");
         }
 
         List<Participants> participants = post.getParticipants();
@@ -361,7 +383,7 @@ public class PostServiceImpl implements PostService{
                 Participants participants1 = participants.stream().filter(participant -> Objects.equals(participant.getUser().getEmail(), currentUser.getEmail())).findFirst().orElseThrow(() -> new IllegalArgumentException("참여자가 아닙니다."));
 
                 if(participants1.getDriverMannerFinish()){
-                    throw new CustomException(ErrorCode.PARTICIPATION_ALREADY_REVIEW_DRIVER);
+                    throw new IllegalStateException("이미 평가한 운전자입니다.");
                 }
 
                 participants1.setDriverMannerFinish(true);
@@ -371,16 +393,18 @@ public class PostServiceImpl implements PostService{
                     case GOOD -> driver.setMannerCount(driverMannerCount + 1);
                     case BAD -> driver.setMannerCount(driverMannerCount - 1);
                     case NORMAL -> driver.setMannerCount(driverMannerCount);
-                    default -> throw new CustomException(ErrorCode.PARTICIPATION_FALSE_MANNER_STATUS);
+                    default -> throw new IllegalStateException("잘못된 평가입니다.");
                 }
+
 
             }
             else{
-                throw new CustomException(ErrorCode.PARTICIPATION_NOT_FOUND);
+                throw new IllegalStateException("해당 글에 참여하지 않았습니다.");
             }
         }
+
         else{
-            throw new CustomException(ErrorCode.PARTICIPATION_THIS_POST_DRIVER);
+            throw new IllegalStateException("해당 글의 운전자입니다.");
         }
         Long updateMannerCount = driver.getMannerCount();
 
@@ -413,21 +437,22 @@ public class PostServiceImpl implements PostService{
     @Transactional
     public PostMsgDto updateParticipatesManner(Long userId, MannerPassengerUpdateRequestDto mannerPassengerUpdateRequestDto, String email){
         UserEntity targetUser = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        UserEntity currentUser = getUserByEmail(email);
+                .orElseThrow(() -> new IllegalArgumentException("운전자의 유저정보가 없습니다."));
+        UserEntity currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("로그인 유저정보가 없습니다."));
 
         Participants participants = participantsRepository.findByPostIdAndUserIdAndIsDeleteYN(mannerPassengerUpdateRequestDto.getPostId(), userId, "N");
 
         if (Objects.equals(targetUser.getEmail(), currentUser.getEmail())) {
-            throw new CustomException(ErrorCode.PARTICIPATION_NOT_REVIEW_SELF);
+            throw new IllegalStateException("자기 자신을 평가할 수 없습니다.");
         }
 
         if(participants.getPassengerMannerFinish()){
-            throw new CustomException(ErrorCode.PARTICIPATION_ALREADY_REVIEW_PARTICIPANT);
+            throw new IllegalStateException("이미 평가한 유저입니다.");
         }
 
         if(!participants.getPost().getPostType().equals(PostType.COMPLETED)){
-            throw new CustomException(ErrorCode.POST_NOT_COMPLETED);
+            throw new IllegalStateException("해당 글은 완료되지 않았습니다.");
         }
 
         if(currentUser.getMannerCount() == null){
@@ -443,7 +468,7 @@ public class PostServiceImpl implements PostService{
             case GOOD -> targetUser.setMannerCount(targetUserMannerCount + 1);
             case BAD -> targetUser.setMannerCount(targetUserMannerCount - 1);
             case NORMAL -> targetUser.setMannerCount(targetUserMannerCount);
-            default -> throw new CustomException(ErrorCode.PARTICIPATION_FALSE_MANNER_STATUS);
+            default -> throw new IllegalStateException("잘못된 평가입니다.");
         }
 
         participants.setPassengerMannerFinish(true);
@@ -488,7 +513,7 @@ public class PostServiceImpl implements PostService{
     @Override
     @Transactional(readOnly = true)
     public Page<PostDto> findByParticipate(String email, Pageable pageable){
-        UserEntity user = getUserByEmail(email);
+        UserEntity user = this.userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저가 없습니다."));
         List<Participants> participants = this.participantsRepository.findByUserIdAndIsDeleteYN(user.getId(), "N");
         return new PageImpl<>(participants.stream().map(Participants::getPost).map(Post::toDto).toList(), pageable, participants.size());
     }
@@ -498,7 +523,7 @@ public class PostServiceImpl implements PostService{
     public List<PostDto> findByLocation(String location) {
 
         if(location == null || location.isBlank()){
-            throw new CustomException(ErrorCode.POST_NOT_EMPTY_LOCATION);
+            throw new IllegalArgumentException("지역을 입력해주세요.");
         }
 
         return postRepository.findByLocationContainingAndIsDeleteYN(location, "N").stream().map(Post::toDto).toList();

@@ -4,10 +4,7 @@ package com.gdsc.projectmiobackend.controller;
 import com.gdsc.projectmiobackend.dto.ParticipateGetDto;
 import com.gdsc.projectmiobackend.dto.PostDto;
 import com.gdsc.projectmiobackend.dto.PostMsgDto;
-import com.gdsc.projectmiobackend.dto.request.MannerDriverUpdateRequestDto;
-import com.gdsc.projectmiobackend.dto.request.MannerPassengerUpdateRequestDto;
-import com.gdsc.projectmiobackend.dto.request.PostCreateRequestDto;
-import com.gdsc.projectmiobackend.dto.request.PostPatchRequestDto;
+import com.gdsc.projectmiobackend.dto.request.*;
 import com.gdsc.projectmiobackend.jwt.dto.UserInfo;
 import com.gdsc.projectmiobackend.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -91,6 +88,30 @@ public class PostController {
     public ResponseEntity<Page<PostDto>> readAll(
             @Parameter(hidden = true) Pageable pageable){
         Page<PostDto> postList = postService.findPostList(pageable);
+
+        return ResponseEntity.ok(postList);
+    }
+
+    @Operation(summary = "게시글 생성 날짜순 + 카테고리 별 + 타겟 날짜 페이징")
+    @Parameters({
+            @Parameter(name = "sort", description = "sort specification",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "createDate,desc"), example = "createDate,desc"),
+            @Parameter(name = "page", description = "page number",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "integer", defaultValue = "0")),
+            @Parameter(name = "size", description = "page size",
+                    in = ParameterIn.QUERY, schema = @Schema(type = "integer", defaultValue = "5"))
+    })
+    @PostMapping("/read/mainPagePaging")
+    public ResponseEntity<Page<PostDto>> readByTargetDatePaging(@Parameter(hidden = true) Pageable pageable, @RequestBody PostMainPageRequestDto postMainPageRequestDto){
+        Page<PostDto> postList = postService.findMainPagePaging(pageable, postMainPageRequestDto);
+
+        return ResponseEntity.ok(postList);
+    }
+
+    @Operation(summary = "게시글 생성 날짜순 + 카테고리 별 + 타겟 날짜 리스트")
+    @PostMapping("/read/mainPageList")
+    public ResponseEntity<List<PostDto>> readByTargetDateList(@RequestBody PostMainPageRequestDto postMainPageRequestDto){
+        List<PostDto> postList = postService.findMainPageList(postMainPageRequestDto);
 
         return ResponseEntity.ok(postList);
     }

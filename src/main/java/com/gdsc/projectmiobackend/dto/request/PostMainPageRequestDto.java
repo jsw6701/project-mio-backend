@@ -1,0 +1,21 @@
+package com.gdsc.projectmiobackend.dto.request;
+
+import com.gdsc.projectmiobackend.common.PostType;
+import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDate;
+
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class PostMainPageRequestDto {
+
+    Long categoryId;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    LocalDate targetDate;
+    PostType postType;
+}
