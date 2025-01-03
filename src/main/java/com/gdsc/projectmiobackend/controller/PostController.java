@@ -30,6 +30,7 @@ public class PostController {
 
     private final PostService postService;
 
+    // 테스트 주석
     @Operation(summary = "게시글 생성")
     @PostMapping(value = "post/{categoryId}")
     public ResponseEntity<PostDto> create(
