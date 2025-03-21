@@ -61,7 +61,7 @@ public class ParticipantsController {
         return ResponseEntity.ok(participateMsgDto);
     }
 
-    @Operation(summary = "유저가 참여한 게시글 조회")
+    @Operation(summary = "마이페이지 > 유저가 참여한 게시글 조회 (게시글 작성자 미포함)")
     @GetMapping("/user/participants")
     public ResponseEntity<List<ParticipateDto>> getParticipantsByUserId(@AuthenticationPrincipal UserInfo user) {
 
@@ -76,7 +76,7 @@ public class ParticipantsController {
         return ResponseEntity.ok(participateMsgDto);
     }
 
-    @Operation(summary = "유저별 카풀 승인 현황")
+    @Operation(summary = "메인페이지 > 상단 > 유저별 카풀 승인 현황 (게시글 작성자 포함)")
     @GetMapping("/user/participants/carpool")
     public ResponseEntity<List<PostDto>> getParticipantsByUserIdAndCarpool(@AuthenticationPrincipal UserInfo user) {
 
