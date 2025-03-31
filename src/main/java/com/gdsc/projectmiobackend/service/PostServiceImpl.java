@@ -77,6 +77,15 @@ public class PostServiceImpl implements PostService{
         return getPostById(id);
     }
 
+
+    private Page<PostDto> getPostDtos(Pageable pageable, List<Post> posts) {
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), posts.size());
+        List<PostDto> postDtos = posts.subList(start, end).stream().map(Post::toDto).toList();
+
+        return new PageImpl<>(postDtos, pageable, posts.size());
+    }
+
     /**
      * 게시글 생성 및 작성자 참여
      * @param postCreateRequestDto
@@ -290,12 +299,13 @@ public class PostServiceImpl implements PostService{
 
     @Override
     @Transactional(readOnly = true)
-    //@Cacheable(value="postCache", key="#userId + 'userId_' + #pageable.pageNumber + '_' + #pageable.pageSize")
     public Page<PostDto> findByMemberId(Long userId, Pageable pageable){
         UserEntity user = this.userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저정보가 없습니다. 아이디: " + userId));
         Page<Post> page = postRepository.findByUserAndIsDeleteYN(user, pageable, "N");
-        return page.map(Post::toDto);
+
+        List<Post> posts = page.getContent();
+        return getPostDtos(pageable, posts);
     }
 
     @Override
@@ -303,7 +313,9 @@ public class PostServiceImpl implements PostService{
     public Page<PostDto> findByRegion3Depth(String email, Pageable pageable){
         UserEntity user = getUserByEmail(email);
         Page<Post> page = postRepository.findByLocation(pageable, "N", user.getActivityLocation());
-        return page.map(Post::toDto);
+
+        List<Post> posts = page.getContent();
+        return getPostDtos(pageable, posts);
     }
     /**
      * 게시글 상세보기
@@ -515,7 +527,9 @@ public class PostServiceImpl implements PostService{
     public Page<PostDto> findByParticipate(String email, Pageable pageable){
         UserEntity user = this.userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("유저가 없습니다."));
         List<Participants> participants = this.participantsRepository.findByUserIdAndIsDeleteYN(user.getId(), "N");
-        return new PageImpl<>(participants.stream().map(Participants::getPost).map(Post::toDto).toList(), pageable, participants.size());
+
+        List<Post> posts = participants.stream().map(Participants::getPost).toList();
+        return getPostDtos(pageable, posts);
     }
 
     @Override
@@ -543,20 +557,18 @@ public class PostServiceImpl implements PostService{
         List<Post> posts = new ArrayList<>();
 
         // 탑승자로 참여한 리스트 중 운전자 평가를 하지 않은 리스트
-        for(Participants p : participants){
-            if(p.getApprovalOrReject() == ApprovalOrReject.FINISH && p.getDriverMannerFinish() == false){
-                posts.add(p.getPost());
-            }
-        }
+        participants.stream()
+                .filter(p -> p.getApprovalOrReject() == ApprovalOrReject.FINISH && !p.getDriverMannerFinish())
+                .map(Participants::getPost)
+                .forEach(posts::add);
 
         // 운전자로 참여한 리스트 중 탑승자 평가를 하지 않은 리스트
-        for(Participants p : participants1){
-            if(p.getApprovalOrReject() == ApprovalOrReject.FINISH && p.getPassengerMannerFinish() == false){
-                posts.add(p.getPost());
-            }
-        }
+        participants1.stream()
+                .filter(p -> p.getApprovalOrReject() == ApprovalOrReject.FINISH && !p.getPassengerMannerFinish())
+                .map(Participants::getPost)
+                .forEach(posts::add);
 
-        return new PageImpl<>(posts.stream().map(Post::toDto).toList(), pageable, posts.size());
+        return getPostDtos(pageable, posts);
     }
 
 
@@ -568,5 +580,4 @@ public class PostServiceImpl implements PostService{
         return postList.stream().map(Post::toDto).toList();
     }
 
-    //test
 }
