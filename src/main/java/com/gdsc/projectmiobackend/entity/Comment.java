@@ -52,7 +52,7 @@ public class Comment {
         List<CommentDto> child = new ArrayList<>();
 
         if(childComments != null && !childComments.isEmpty()) {
-            child = childComments.stream().map(Comment::toDto).toList();
+            child = childComments.stream().map(Comment::toDto).collect(Collectors.toList());
         }
         return CommentDto.builder()
                 .commentId(commentId)

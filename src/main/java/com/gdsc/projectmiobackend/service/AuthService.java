@@ -3,34 +3,38 @@ package com.gdsc.projectmiobackend.service;
 
 import com.gdsc.projectmiobackend.common.AccountApprovalStatus;
 import com.gdsc.projectmiobackend.common.ErrorCode;
+import com.gdsc.projectmiobackend.common.RoleType;
 import com.gdsc.projectmiobackend.common.Status;
 import com.gdsc.projectmiobackend.discord.MsgService;
 import com.gdsc.projectmiobackend.dto.SocialLoginRequest;
 import com.gdsc.projectmiobackend.dto.request.AdditionalUserPatchDto;
 import com.gdsc.projectmiobackend.entity.UserEntity;
 import com.gdsc.projectmiobackend.exception.CustomException;
-import com.gdsc.projectmiobackend.jwt.dto.UserInfo;
-import com.gdsc.projectmiobackend.repository.UserRepository;
-import com.gdsc.projectmiobackend.common.RoleType;
 import com.gdsc.projectmiobackend.jwt.TokenProvider;
 import com.gdsc.projectmiobackend.jwt.dto.TokenResponse;
+import com.gdsc.projectmiobackend.jwt.dto.UserInfo;
 import com.gdsc.projectmiobackend.oauth.GoogleOAuth2UserInfo;
+import com.gdsc.projectmiobackend.repository.UserRepository;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.google.api.client.json.gson.GsonFactory;
-import java.util.Collections;
+
+import java.util.Arrays;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-    @Value("${google.client.id}")
-    private String googleClientId;
+    @Value("${google.client.debug.id}")
+    private String googleClientDebugId;
+
+    @Value("${google.client.release.id}")
+    private String googleClientReleaseId;
 
     private final TokenProvider tokenProvider;
 
@@ -42,7 +46,7 @@ public class AuthService {
     @Transactional
     public TokenResponse googleLogin(SocialLoginRequest socialLoginRequest) throws Exception {
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
-                .setAudience(Collections.singletonList(googleClientId))
+                .setAudience(Arrays.asList(googleClientDebugId, googleClientReleaseId))
                 .build();
 
 
