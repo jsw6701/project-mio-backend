@@ -167,7 +167,7 @@ public class PostServiceImpl implements PostService{
     }
 
     /**
-     * SSE 알림과 DB 알림 저장 비동기처리(test)
+     * SSE 알림과 DB 알림 저장 비동기처리
      *
      * @param user
      * @param post
