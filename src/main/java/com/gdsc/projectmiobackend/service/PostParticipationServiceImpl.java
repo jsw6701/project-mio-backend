@@ -2,9 +2,9 @@ package com.gdsc.projectmiobackend.service;
 
 import com.gdsc.projectmiobackend.common.ApprovalOrReject;
 import com.gdsc.projectmiobackend.common.PostType;
-import com.gdsc.projectmiobackend.dto.ParticipateMsgDto;
 import com.gdsc.projectmiobackend.dto.ParticipateCheckDto;
 import com.gdsc.projectmiobackend.dto.ParticipateDto;
+import com.gdsc.projectmiobackend.dto.ParticipateMsgDto;
 import com.gdsc.projectmiobackend.dto.PostDto;
 import com.gdsc.projectmiobackend.entity.Alarm;
 import com.gdsc.projectmiobackend.entity.Participants;
@@ -16,7 +16,6 @@ import com.gdsc.projectmiobackend.repository.ParticipantsRepository;
 import com.gdsc.projectmiobackend.repository.PostRepository;
 import com.gdsc.projectmiobackend.repository.UserRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -202,6 +201,13 @@ public class PostParticipationServiceImpl implements PostParticipationService {
 
         if(post.getNumberOfPassengers() <= post.getParticipantsCount()){
             throw new IllegalArgumentException("해당 게시글의 최대 탑승인원을 초과하였습니다.");
+        }
+
+        List<Participants> approvedParticipants = participantsRepository.findByUserIdAndIsDeleteYN(participants.getUser().getId(), "N");
+        for (Participants p : approvedParticipants) {
+            if (p.getApprovalOrReject() == ApprovalOrReject.APPROVAL && p.getPost().getTargetDate().isEqual(post.getTargetDate())) {
+                throw new IllegalArgumentException("같은 날짜에 이미 승인된 참여가 있는 유저입니다.");
+            }
         }
 
         participants.setApprovalOrReject(ApprovalOrReject.APPROVAL);
