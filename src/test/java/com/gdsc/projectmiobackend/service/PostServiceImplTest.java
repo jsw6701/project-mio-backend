@@ -1,7 +1,9 @@
 package com.gdsc.projectmiobackend.service;
 
+import com.gdsc.projectmiobackend.common.PostType;
 import com.gdsc.projectmiobackend.dto.PostDto;
 import com.gdsc.projectmiobackend.dto.request.PostCreateRequestDto;
+import com.gdsc.projectmiobackend.dto.request.PostPatchRequestDto;
 import com.gdsc.projectmiobackend.entity.Category;
 import com.gdsc.projectmiobackend.entity.Participants;
 import com.gdsc.projectmiobackend.entity.Post;
@@ -18,11 +20,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class PostServiceImplTest {
@@ -73,6 +77,7 @@ class PostServiceImplTest {
         post.setId(id);
         post.setTitle(title);
         post.setContent(content);
+        post.setCategory(category);
         return post;
     }
 
@@ -131,7 +136,7 @@ class PostServiceImplTest {
         assertThrows(IllegalArgumentException.class, () -> postService.addPost(requestDto, category.getCategoryId(), user.getEmail()));
     }
 
-/*    @Test
+    @Test
     @DisplayName("게시글 삭제_성공")
     void deletePost_Success() {
         // Given
@@ -144,8 +149,99 @@ class PostServiceImplTest {
 
         // When
         postService.deletePostList(post.getId(), user.getEmail());
+        // Then
+        verify(postRepository).deletePost(user.getId(), post.getId());
+    }
+
+    @Test
+    @DisplayName("게시글 삭제_실패(당일 게시글)")
+    void deletePost_PostTodayFail() {
+        // Given
+        post.setPostType(PostType.COMPLETED);
+        post.setTargetDate(LocalDate.now());
+        post.setIsDeleteYN("N");
+
+        given(postRepository.findById(post.getId())).willReturn(Optional.of(post));
+
+        // When & Then
+        assertThrows(IllegalStateException.class, () ->  postService.deletePostList(post.getId(), user.getEmail()));
+    }
+
+    @Test
+    @DisplayName("게시글 삭제_실패(완료된 게시글)")
+    void deletePost_PostCompleteFail() {
+        // Given
+        post.setPostType(PostType.COMPLETED);
+        post.setTargetDate(LocalDate.now().plusDays(1));
+        post.setIsDeleteYN("N");
+
+        given(postRepository.findById(post.getId())).willReturn(Optional.of(post));
+
+        // When & Then
+        assertThrows(IllegalStateException.class, () ->  postService.deletePostList(post.getId(), user.getEmail()));
+    }
+
+    @Test
+    @DisplayName("게시글 삭제_실패(마감된 게시글)")
+    void deletePost_PostDeadLineFail() {
+        // Given
+        post.setPostType(PostType.DEADLINE);
+        post.setTargetDate(LocalDate.now().plusDays(1));
+        post.setIsDeleteYN("N");
+
+        given(postRepository.findById(post.getId())).willReturn(Optional.of(post));
+
+        // When & Then
+        assertThrows(IllegalStateException.class, () ->  postService.deletePostList(post.getId(), user.getEmail()));
+    }
+
+    @Test
+    @DisplayName("게시글 업데이트_성공")
+    void updatePost_Success() {
+        // Given
+        PostPatchRequestDto requestDto = PostPatchRequestDto.builder()
+                .title("Update Title")
+                .content("Update Content")
+                .categoryId(1L)
+                .build();
+
+        post.setUser(user);
+        given(postRepository.findById(post.getId())).willReturn(Optional.of(post));
+        given(userRepository.findByEmail(user.getEmail())).willReturn(Optional.of(user));
+        given(categoryRepository.findById(requestDto.getCategoryId())).willReturn(Optional.of(category));
+        given(postRepository.save(any(Post.class))).willReturn(post);
+
+        // When
+        PostDto result = postService.updateById(post.getId(), requestDto, user.getEmail());
 
         // Then
-        assertEquals("Y", post.getIsDeleteYN());
-    }*/
+        assertNotNull(result);
+        assertEquals("Update Title", result.getTitle());
+        assertEquals("Update Content", result.getContent());
+    }
+
+    @Test
+    @DisplayName("게시글 업데이트_실패(게시글을 찾을 수 없는 경우)")
+    void updatePost_PostNotFound() {
+        // Given
+        PostPatchRequestDto requestDto = PostPatchRequestDto.builder()
+                .title("Update Title")
+                .content("Update Content")
+                .categoryId(1L)
+                .build();
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> postService.updateById(post.getId(), requestDto, user.getEmail()));
+    }
+
+    @Test
+    @DisplayName("게시글 업데이트_실패(유저를 찾을 수 없는 경우)")
+    void updatePost_UserNotFound() {
+        // Given
+        PostPatchRequestDto requestDto = new PostPatchRequestDto();
+
+        given(userRepository.findByEmail(user.getEmail())).willReturn(Optional.empty());
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> postService.updateById(post.getId(), requestDto, user.getEmail()));
+    }
 }
