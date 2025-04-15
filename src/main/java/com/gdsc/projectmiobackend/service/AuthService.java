@@ -87,6 +87,11 @@ public class AuthService {
     }
 
     @Transactional
+    public TokenResponse googleLoginTest(String email, String name) throws Exception {
+        return sendGenerateJwtToken(email, name);
+    }
+
+    @Transactional
     public UserEntity update(Long userId, AdditionalUserPatchDto additionalUserPatchDto) throws Exception {
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new Exception("INVALID_TOKEN"));
         userEntity.setGender(additionalUserPatchDto.getGender());

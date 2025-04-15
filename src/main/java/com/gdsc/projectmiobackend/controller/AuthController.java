@@ -38,4 +38,10 @@ public class AuthController {
         authService.logout(user.getEmail() , logoutRequest.refreshToken());
         return ResponseEntity.ok("LOGOUT_SUCCESS");
     }
+
+    @PostMapping("/auth/google/test")
+    public ResponseEntity<TokenResponse> googleTest(@RequestParam String email, @RequestParam String name) throws Exception {
+        TokenResponse tokenResponse = authService.googleLoginTest(email, name);
+        return ResponseEntity.ok(tokenResponse);
+    }
 }
