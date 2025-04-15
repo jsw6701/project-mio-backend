@@ -23,7 +23,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByUserAndIsDeleteYN(UserEntity user, Pageable pageable, String isDeleteYN);
 
     @Query("SELECT p FROM Post p WHERE p.region3Depth = :activityLocation AND p.isDeleteYN = :isDeleteYN")
-    Page<Post> findByLocation(Pageable pageable, String isDeleteYN, String activityLocation);
+    Page<Post> findByLocation(Pageable pageable, @Param("isDeleteYN") String isDeleteYN, @Param("activityLocation") String activityLocation);
 
     List<Post> findByLatitudeAndLongitudeAndIsDeleteYN(Double latitude, Double longitude, String isDeleteYN);
 
@@ -63,7 +63,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Modifying
     @Transactional
     @Query("UPDATE Post p SET p.isDeleteYN = 'Y' WHERE p.user.id = :userId and p.id = :id")
-    void deletePost(Long userId, Long id);
+    void deletePost(@Param("userId") Long userId, @Param("id") Long id);
 
     Page<Post> findAllByIsDeleteYN(String isDeleteYN, Pageable pageable);
 }
