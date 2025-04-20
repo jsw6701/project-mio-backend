@@ -1,18 +1,16 @@
 package com.gdsc.projectmiobackend.controller;
 
-import com.gdsc.projectmiobackend.service.AuthService;
 import com.gdsc.projectmiobackend.dto.LogoutRequest;
 import com.gdsc.projectmiobackend.dto.SocialLoginRequest;
 import com.gdsc.projectmiobackend.jwt.dto.TokenResponse;
 import com.gdsc.projectmiobackend.jwt.dto.UserInfo;
+import com.gdsc.projectmiobackend.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,12 +25,14 @@ public class AuthController {
         return ResponseEntity.ok(tokenResponse);
     }
 
-    @PostMapping("/token")
-    public ResponseEntity<TokenResponse> reissue(@AuthenticationPrincipal UserInfo user, @RequestBody LogoutRequest logoutRequest) throws Exception {
-        TokenResponse tokenResponse = authService.reissue(user.getEmail(),user.getName(), logoutRequest.refreshToken());
+    @Operation(summary = "Refresh Token으로 재발급")
+    @PostMapping("/reissue")
+    public ResponseEntity<TokenResponse> reissue(@RequestBody LogoutRequest logoutRequest) throws Exception {
+        TokenResponse tokenResponse = authService.reissue(logoutRequest.refreshToken());
         return ResponseEntity.ok(tokenResponse);
     }
 
+    @Operation(summary = "로그아웃")
     @DeleteMapping("/user")
     public ResponseEntity<?> logout(@AuthenticationPrincipal UserInfo user, @RequestBody LogoutRequest logoutRequest) throws Exception {
         authService.logout(user.getEmail() , logoutRequest.refreshToken());

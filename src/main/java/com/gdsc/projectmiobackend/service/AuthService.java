@@ -19,13 +19,14 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
-import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +43,8 @@ public class AuthService {
     private final UserRepository userRepository;
 
     private final MsgService msgService;
+
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Transactional
     public TokenResponse googleLogin(SocialLoginRequest socialLoginRequest) throws Exception {
@@ -77,7 +80,12 @@ public class AuthService {
 
                 msgService.sendMsg("유저 로그인", userInfo.getEmail() + " / " + userInfo.getName(), "기존 유저 로그인");
             }
-            return sendGenerateJwtToken(userInfo.getEmail(), userInfo.getName());
+            TokenResponse tokenResponse = sendGenerateJwtToken(userInfo.getEmail(), userInfo.getName());
+
+            // Refresh Token 저장
+            saveRefreshToken(userInfo.getEmail(), tokenResponse.refreshToken());
+
+            return tokenResponse;
 //            }
 /*            else{
                 throw new Exception("대진대학교 이메일이 아니거나, 권한이 없습니다.");
@@ -88,7 +96,11 @@ public class AuthService {
 
     @Transactional
     public TokenResponse googleLoginTest(String email, String name) throws Exception {
-        return sendGenerateJwtToken(email, name);
+        TokenResponse tokenResponse = sendGenerateJwtToken(email, name);
+        // Refresh Token 저장
+        saveRefreshToken(email, tokenResponse.refreshToken());
+
+        return tokenResponse;
     }
 
     @Transactional
@@ -122,15 +134,32 @@ public class AuthService {
 
     @Transactional
     public void logout(String email, String refreshToken) throws Exception {
-        validateRefreshToken(refreshToken);
-        Claims claims = tokenProvider.parseClaims(refreshToken);
+        // Redis에서 이메일로 저장된 리프레시 토큰 조회
+        String storedToken = getRefreshToken(email);
+        if (storedToken != null && storedToken.equals(refreshToken)) {
+            deleteRefreshToken(email); // 이메일로 리프레시 토큰 삭제
+        }
     }
 
     @Transactional
-    public TokenResponse reissue(String email, String name, String refreshToken) throws Exception {
-        validateRefreshToken(refreshToken);
+    public TokenResponse reissue(String refreshToken) throws Exception {
+        // Redis에서 모든 이메일-리프레시 토큰 데이터 조회
+        String email = redisTemplate.opsForHash().entries("refreshTokens").entrySet().stream()
+                .filter(entry -> refreshToken.equals(entry.getValue()))
+                .map(entry -> (String) entry.getKey())
+                .findFirst()
+                .orElseThrow(() -> new Exception("Invalid Refresh Token"));
 
-        TokenResponse tokenResponse = createToken(email, name);
+        // 이메일로 유저 정보 조회
+        UserEntity userEntity = userRepository.findByEmail(email)
+                .orElseThrow(() -> new Exception("User not found"));
+
+        // 새로운 Access Token 및 Refresh Token 생성
+        TokenResponse tokenResponse = tokenProvider.generateJwtToken(email, userEntity.getName(), userEntity.getRoleType());
+
+        // Redis에 새로운 Refresh Token 저장 (기존 토큰은 무효화)
+        saveRefreshToken(email, tokenResponse.refreshToken());
+
         return tokenResponse;
     }
 
@@ -156,6 +185,21 @@ public class AuthService {
     @Transactional
     public UserEntity getUserEntity(Long userId) throws Exception {
         return userRepository.findById(userId).orElseThrow(() -> new Exception("INVALID_TOKEN"));
+    }
+
+    public void saveRefreshToken(String email, String refreshToken) {
+        redisTemplate.opsForHash().put("refreshTokens", email, refreshToken);
+        redisTemplate.expire("refreshTokens", 7, TimeUnit.DAYS); // 전체 키에 만료 시간 설정
+    }
+
+    // Redis에서 이메일로 리프레시 토큰 조회
+    public String getRefreshToken(String email) {
+        return (String) redisTemplate.opsForHash().get("refreshTokens", email);
+    }
+
+    // Redis에서 이메일로 리프레시 토큰 삭제
+    public void deleteRefreshToken(String email) {
+        redisTemplate.opsForHash().delete("refreshTokens", email);
     }
 
     public UserEntity setAccountStatus(AccountApprovalStatus status, UserInfo user) throws Exception {
