@@ -16,6 +16,9 @@ public interface ParticipantsRepository extends JpaRepository<Participants, Long
     @Query("SELECT p FROM Participants p WHERE p.user.id = :userId AND p.isDeleteYN = :isDeleteYN AND p.user.id != p.postUserId AND p.driverMannerFinish = false")
     List<Participants> findByUserIdAndIsDeleteYN(@Param("userId") Long userId, @Param("isDeleteYN") String isDeleteYN);
 
+    @Query("SELECT p FROM Participants p WHERE p.user.id = :userId AND p.isDeleteYN = :isDeleteYN")
+    List<Participants> findByUserIdAndIsDeleteYNMain(@Param("userId") Long userId, @Param("isDeleteYN") String isDeleteYN);
+
     @Query("SELECT p FROM Participants p WHERE p.postUserId = :postUserId AND p.isDeleteYN = :isDeleteYN AND p.user.id != p.postUserId AND p.driverMannerFinish = false")
     List<Participants> findByPostUserIdAndIsDeleteYN(@Param("postUserId") Long postUserId, @Param("isDeleteYN") String isDeleteYN);
 
