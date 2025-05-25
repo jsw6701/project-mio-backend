@@ -21,4 +21,7 @@ public class ParticipateDto {
     private Boolean passengerMannerFinish;
     private Boolean verifyFinish;
     private String isDeleteYN;
+    private Boolean verifySmoker;
+    private Boolean gender;
+    private Boolean verifyGoReturn;
 }

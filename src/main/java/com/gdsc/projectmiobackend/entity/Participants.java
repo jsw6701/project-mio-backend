@@ -32,6 +32,17 @@ public class Participants {
     @Nullable
     private Boolean verifyFinish;
 
+    //성별
+    @Nullable
+    private Boolean gender;
+
+    //흡연여부
+    @Nullable
+    private Boolean verifySmoker;
+
+    //등교 혹은 하교 여부
+    private Boolean verifyGoReturn;
+
     @Nullable
     private Boolean driverMannerFinish;
 
@@ -57,6 +68,9 @@ public class Participants {
                 .passengerMannerFinish(passengerMannerFinish)
                 .postUserId(postUserId)
                 .verifyFinish(verifyFinish)
+                .verifySmoker(verifySmoker)
+                .verifyGoReturn(verifyGoReturn)
+                .gender(gender)
                 .isDeleteYN(isDeleteYN)
                 .build();
     }

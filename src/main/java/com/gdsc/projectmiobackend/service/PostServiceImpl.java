@@ -109,8 +109,8 @@ public class PostServiceImpl implements PostService{
                 .content("작성자")
                 .approvalOrReject(ApprovalOrReject.APPROVAL)
                 .verifyFinish(false)
-                .driverMannerFinish(false)
-                .passengerMannerFinish(false)
+                .driverMannerFinish(true)
+                .passengerMannerFinish(true)
                 .postUserId(user.getId())
                 .isDeleteYN("N")
                 .build();
@@ -407,16 +407,11 @@ public class PostServiceImpl implements PostService{
         Long driverMannerCount = driver.getMannerCount();
 
         if (!Objects.equals(post.getUser().getEmail(), currentUser.getEmail())) {
-            if(participants.stream().anyMatch(participant -> Objects.equals(participant.getUser().getEmail(), currentUser.getEmail()))){
-
-                Participants participants1 = participants.stream().filter(participant -> Objects.equals(participant.getUser().getEmail(), currentUser.getEmail())).findFirst().orElseThrow(() -> new IllegalArgumentException("참여자가 아닙니다."));
-
-                if(participants1.getDriverMannerFinish()){
-                    throw new IllegalStateException("이미 평가한 운전자입니다.");
-                }
-
-                participants1.setDriverMannerFinish(true);
-                participantsRepository.save(participants1);
+            Participants participant = participants.stream().filter(p -> Objects.equals(p.getUser().getEmail(), currentUser.getEmail())).
+                    findFirst().orElse(null);
+            if (participant != null) {
+                participant.setDriverMannerFinish(true);
+                participantsRepository.save(participant);
 
                 switch (mannerDriverUpdateRequestDto.getManner()) {
                     case GOOD -> driver.setMannerCount(driverMannerCount + 1);
@@ -424,7 +419,6 @@ public class PostServiceImpl implements PostService{
                     case NORMAL -> driver.setMannerCount(driverMannerCount);
                     default -> throw new IllegalStateException("잘못된 평가입니다.");
                 }
-
 
             }
             else{
@@ -511,17 +505,17 @@ public class PostServiceImpl implements PostService{
 
     private String calculateGrade(Long mannerCount) {
         String[] grades = {
-            "F",   // <= -1
-            "D",   // 0-9
-            "D+",  // 10-19
-            "C",   // 20-29
-            "C+",  // 30-39`
-            "B",   // 40-49
-            "B+",  // 50-59
-            "A",   // 60-69
-            "A+",  // 70-79
-            "MIO 조교님",  // 80-89
-            "MIO 교수님"   // >= 90
+                "F",   // <= -1
+                "D",   // 0-9
+                "D+",  // 10-19
+                "C",   // 20-29
+                "C+",  // 30-39`
+                "B",   // 40-49
+                "B+",  // 50-59
+                "A",   // 60-69
+                "A+",  // 70-79
+                "MIO 조교님",  // 80-89
+                "MIO 교수님"   // >= 90
         };
 
         int index = Math.min(Math.max((int) ((mannerCount + 1) / 10), 0) + 1, grades.length - 1);

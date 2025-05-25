@@ -27,7 +27,6 @@ public class PostDto {
     private LocalDate targetDate;
     private LocalTime targetTime;
     private Category category;
-    private Boolean verifyGoReturn;
     private Integer numberOfPassengers;
     private UserEntity user;
     private Long viewCount;
@@ -40,6 +39,9 @@ public class PostDto {
     private String isDeleteYN;
     private PostType postType;
     private String region3Depth;
+    private Boolean gender;
+    private Boolean verifySmoker;
+    private Boolean verifyGoReturn;
 
     @Builder.Default
     private List<ParticipateDto> participants = Collections.emptyList(); // 기본값을 빈 리스트로 설정

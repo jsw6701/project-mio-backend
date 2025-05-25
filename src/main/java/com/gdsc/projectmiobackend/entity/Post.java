@@ -3,6 +3,7 @@ package com.gdsc.projectmiobackend.entity;
 import com.gdsc.projectmiobackend.common.PostType;
 import com.gdsc.projectmiobackend.dto.ParticipateDto;
 import com.gdsc.projectmiobackend.dto.PostDto;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -42,9 +43,6 @@ public class Post {
 
     private LocalTime targetTime;
 
-    //등하교 선택
-    private Boolean verifyGoReturn;
-
     //탑승자 수
     private Integer numberOfPassengers;
 
@@ -68,6 +66,18 @@ public class Post {
 
     @Enumerated(EnumType.STRING)
     private PostType postType;
+
+    //성별
+    @Nullable
+    private Boolean gender;
+
+    //흡연여부
+    @Nullable
+    private Boolean verifySmoker;
+
+    //등하교 선택
+    @Nullable
+    private Boolean verifyGoReturn;
 
     @ManyToOne
     @JoinColumn
@@ -103,6 +113,8 @@ public class Post {
                 .targetTime(targetTime)
                 .category(category)
                 .verifyGoReturn(verifyGoReturn)
+                .verifySmoker(verifySmoker)
+                .gender(gender)
                 .numberOfPassengers(numberOfPassengers)
                 .participantsCount(participantsCount)
                 .participants(participantsList)

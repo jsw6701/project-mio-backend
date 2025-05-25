@@ -38,6 +38,12 @@ public class PostCreateRequestDto {
     @DateTimeFormat(pattern = "HH:mm")
     private LocalTime targetTime;
 
+    @Schema(description = "성별 false: 남성 true: 여성", example = "false")
+    private Boolean gender;
+
+    @Schema(description = "흡연 여부 false: 비흡연 true: 흡연", example = "false")
+    private Boolean verifySmoker;
+
     @Schema(description = "등/하교 선택 true 등교, false 하교", example = "true")
     private Boolean verifyGoReturn;
 
@@ -67,6 +73,8 @@ public class PostCreateRequestDto {
                 .targetDate(targetDate)
                 .targetTime(targetTime)
                 .verifyGoReturn(verifyGoReturn)
+                .gender(gender)
+                .verifySmoker(verifySmoker)
                 .numberOfPassengers(numberOfPassengers)
                 .participantsCount(0L)
                 .viewCount(0L)

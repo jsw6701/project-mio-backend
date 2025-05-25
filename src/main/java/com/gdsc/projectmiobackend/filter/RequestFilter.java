@@ -1,3 +1,4 @@
+/*
 package com.gdsc.projectmiobackend.filter;
 
 import com.gdsc.projectmiobackend.discord.MsgService;
@@ -34,7 +35,8 @@ public class RequestFilter implements Filter {
             return;
         }
 
-        ContentCachingRequestWrapper requestWrapper = new ContentCachingRequestWrapper((HttpServletRequest) request);
+        */
+/*ContentCachingRequestWrapper requestWrapper = new ContentCachingRequestWrapper((HttpServletRequest) request);
         ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper((HttpServletResponse) response);
 
         long start = System.currentTimeMillis();
@@ -46,6 +48,8 @@ public class RequestFilter implements Filter {
         String requestBody = getRequestBody(requestWrapper);
         String responseBody = getResponseBody(responseWrapper);
         String requestURI = ((HttpServletRequest) request).getRequestURI();
+*//*
+ */
 /*        log.info("\n" +
                         "[REQUEST] {} - {} {} - {}\n" +
                         "Headers : {}\n" +
@@ -57,7 +61,9 @@ public class RequestFilter implements Filter {
                 (end - start) / 1000.0,
                 getHeaders((HttpServletRequest) request),
                 getRequestBody(requestWrapper),
-                getResponseBody(responseWrapper));*/
+                getResponseBody(responseWrapper));*//*
+ */
+/*
 
         responseWrapper.copyBodyToResponse();
 
@@ -80,7 +86,8 @@ public class RequestFilter implements Filter {
                         "실시간 API 로그"
                 );
             }
-        }
+        }*//*
+
     }
 
     private boolean isSseRequest(HttpServletRequest request) {
@@ -126,4 +133,4 @@ public class RequestFilter implements Filter {
         }
         return null == payload ? " - " : payload;
     }
-}
+}*/

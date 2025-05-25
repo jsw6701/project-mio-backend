@@ -65,6 +65,8 @@ public class PostPatchRequestDto {
                 .targetDate(this.targetDate != null ? this.targetDate : existingPost.getTargetDate())
                 .targetTime(this.targetTime != null ? this.targetTime : existingPost.getTargetTime())
                 .verifyGoReturn(existingPost.getVerifyGoReturn())
+                .verifySmoker(existingPost.getVerifySmoker())
+                .gender(existingPost.getGender())
                 .numberOfPassengers(this.numberOfPassengers != null ? this.numberOfPassengers : existingPost.getNumberOfPassengers())
                 .viewCount(existingPost.getViewCount())
                 .latitude(this.latitude != null ? this.latitude : existingPost.getLatitude())

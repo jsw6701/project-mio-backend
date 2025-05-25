@@ -6,6 +6,7 @@ import com.gdsc.projectmiobackend.dto.ParticipateCheckDto;
 import com.gdsc.projectmiobackend.dto.ParticipateDto;
 import com.gdsc.projectmiobackend.dto.ParticipateMsgDto;
 import com.gdsc.projectmiobackend.dto.PostDto;
+import com.gdsc.projectmiobackend.dto.request.ParticipateCreateRequestDto;
 import com.gdsc.projectmiobackend.entity.Alarm;
 import com.gdsc.projectmiobackend.entity.Participants;
 import com.gdsc.projectmiobackend.entity.Post;
@@ -74,6 +75,52 @@ public class PostParticipationServiceImpl implements PostParticipationService {
 
         // 게시글 작성자에게 유저 신청 알림
         notificationService.customNotify(post.getUser().getId(), post.getId()+":"+user.getStudentId() + " 님이 카풀(택시)을 신청하였어요.", user.getStudentId() + " 님이 카풀(택시)을 신청하였어요.", "participate");
+        Alarm alarm = Alarm.builder()
+                .post(post)
+                .userEntity(post.getUser())
+                .content(user.getStudentId() + " 님이 카풀(택시)을 신청하였어요.")
+                .createDate(LocalDateTime.now())
+                .build();
+        alarmRepository.save(alarm);
+        participantsRepository.save(participants);
+
+        return participants.toDto();
+    }
+
+    @Override
+    public ParticipateDto participateInPostV2(Long postId, String email, ParticipateCreateRequestDto participateCreateRequestDto) {
+        UserEntity user = getUser(email);
+        Post post = getPost(postId);
+
+        if (participantsRepository.findByPostIdAndUserIdAndIsDeleteYN(postId, user.getId(), "N") != null) {
+            throw new IllegalArgumentException("이미 신청한 게시글입니다.");
+        }
+
+        if (!post.getPostType().equals(PostType.BEFORE_DEADLINE)) {
+            throw new IllegalArgumentException("마감된 게시글에 신청할 수 없습니다.");
+        }
+        /*
+        if(Objects.equals(user.getEmail(), post.getUser().getEmail())){
+            throw new IllegalArgumentException("자신의 게시글에는 신청할 수 없습니다.");
+        }*/
+
+        Participants participants = Participants.builder()
+                .post(post)
+                .user(user)
+                .content(participateCreateRequestDto.getContent())
+                .gender(participateCreateRequestDto.getGender())
+                .verifySmoker(participateCreateRequestDto.getVerifySmoker())
+                .verifyGoReturn(participateCreateRequestDto.getVerifyGoReturn())
+                .approvalOrReject(ApprovalOrReject.WAITING)
+                .verifyFinish(false)
+                .driverMannerFinish(false)
+                .passengerMannerFinish(false)
+                .postUserId(post.getUser().getId())
+                .isDeleteYN("N")
+                .build();
+
+        // 게시글 작성자에게 유저 신청 알림
+        notificationService.customNotify(post.getUser().getId(), post.getId() + ":" + user.getStudentId() + " 님이 카풀(택시)을 신청하였어요.", user.getStudentId() + " 님이 카풀(택시)을 신청하였어요.", "participate");
         Alarm alarm = Alarm.builder()
                 .post(post)
                 .userEntity(post.getUser())
